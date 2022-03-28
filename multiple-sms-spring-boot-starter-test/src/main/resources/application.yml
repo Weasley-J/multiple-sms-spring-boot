@@ -2,4 +2,4 @@ server:
   port: 80
 spring:
   profiles:
-    active: lwj
+    active: sms
