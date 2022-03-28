@@ -4,14 +4,16 @@
 >
 > 如何使用一个注解`@SMS`和一个模板类`SmsTemplate`在多个**短信供应商**和**多个短信模板**之间**优雅**的切换
 
-
+**requirement**
 
 | item        | requirement            | remark |
 | ----------- | ---------------------- | ------ |
 | JDK         | JDK1.8 or latest       |        |
 | Environment | Spring Web Application |        |
 
+**project tree map**
 
+![image-20220328232832302](https://alphahub-test-bucket.oss-cn-shanghai.aliyuncs.com/image/image-20220328232832302.png)
 
 ## 1 故事背景
 
