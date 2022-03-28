@@ -4,6 +4,15 @@
 >
 > 如何使用一个注解`@SMS`和一个模板类`SmsTemplate`在多个**短信供应商**和**多个短信模板**之间**优雅**的切换
 
+
+
+| item        | requirement            | remark |
+| ----------- | ---------------------- | ------ |
+| JDK         | JDK1.8 or latest       |        |
+| Environment | Spring Web Application |        |
+
+
+
 ## 1 故事背景
 
 我们先来看一张笔者一朋友张三所在的公司的短信模板图：
