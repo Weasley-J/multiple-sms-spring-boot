@@ -83,7 +83,7 @@ public class DefaultAliCloudSmsClientImpl implements SmsClient {
         try {
             response = this.getAcsClient().getCommonResponse(request);
         } catch (ClientException e) {
-            log.error("发送短信异常:{}", e.getMessage(), e);
+            log.error("{},{}发送短信异常:{}", JSONUtil.toJsonStr(phones), content, e.getMessage(), e);
         }
         log.info("发送短信状态:{}", JSONUtil.toJsonStr(response.getData()));
 

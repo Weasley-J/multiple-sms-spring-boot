@@ -24,7 +24,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
  *
  * @author lwj
  * @version 1.0
- * @apiNote <a href='https://developer.qiniu.com/sms/5897/sms-api-send-message'>七牛云短信帮助书文档</a>
+ * @apiNote <a href="https://developer.qiniu.com/sms/5897/sms-api-send-message">七牛云短信帮助书文档</a>
  * @date 2021-09-24
  */
 @Slf4j
@@ -86,6 +86,8 @@ public class DefaultQiniuCloudSmsClientImpl implements SmsClient {
         } catch (QiniuException e) {
             log.error("{}", e.getLocalizedMessage(), e);
             Map<String, Object> responseMap = new LinkedHashMap<>(1);
+            responseMap.put("phones", phones);
+            responseMap.put("content", content);
             responseMap.put("error", e.getLocalizedMessage());
             return JSONUtil.toJsonStr(responseMap);
         }

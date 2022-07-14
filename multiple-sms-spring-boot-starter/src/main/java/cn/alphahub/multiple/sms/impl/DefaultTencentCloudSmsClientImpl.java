@@ -30,12 +30,13 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
 public class DefaultTencentCloudSmsClientImpl implements SmsClient {
     /**
-     * 短信SdkAppId，在<a href='https://console.cloud.tencent.com/smsv2'>短信控制台</a>添加应用后生成的实际 SdkAppId，示例如1400006666
+     * 添加应用后生成的实际 SdkAppId，示例如1400006666
+     * 短信SdkAppId，在<a href="https://console.cloud.tencent.com/smsv2">短信控制台</a>
      * <p>更换为自己的短信SdkAppId</p>
      */
     private static final String SDK_APP_ID = "your_sdk_app_id";
     /**
-     * 模板ID，必须填写已审核通过的模板ID。模板ID可登录<a href='https://console.cloud.tencent.com/smsv2/csms-template'>短信控制台</a>查看，若向境外手机号发送短信，仅支持使用国际/港澳台短信模板。
+     * 模板ID，必须填写已审核通过的模板ID。模板ID可登录<a href="https://console.cloud.tencent.com/smsv2/csms-template">短信控制台</a>查看，若向境外手机号发送短信，仅支持使用国际/港澳台短信模板。
      * <p>更换为自己的短信模板ID</p>
      */
     private static final String TEMPLATE_ID = "your_template_id";

@@ -42,7 +42,7 @@ import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
  *
  * @author lwj
  * @version 1.0
- * @apiNote <a href='https://support.huaweicloud.com/devg-msgsms/sms_04_0002.html'>华为云短信帮助链接</a>，暂不支持个人用户申请
+ * @apiNote <a href="https://support.huaweicloud.com/devg-msgsms/sms_04_0002.html">华为云短信帮助链接</a>，暂不支持个人用户申请
  * @date 2021-09-24
  */
 @Slf4j
@@ -123,7 +123,6 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
         Writer out = null;
         BufferedReader in = null;
         StringBuilder result = new StringBuilder();
-        HttpsURLConnection connection;
         InputStream is = null;
 
 
@@ -135,7 +134,7 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
 
         try {
             URL realUrl = new URL(url);
-            connection = (HttpsURLConnection) realUrl.openConnection();
+            HttpsURLConnection connection = (HttpsURLConnection) realUrl.openConnection();
 
             connection.setHostnameVerifier((hostname, sslSession) -> Boolean.TRUE);
             connection.setDoOutput(true);
@@ -183,7 +182,7 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
                     in.close();
                 }
             } catch (Exception e) {
-                e.printStackTrace();
+                log.error("prams: {}", JSONUtil.toJsonStr(result.toString()), e);
             }
         }
         return result.toString();
