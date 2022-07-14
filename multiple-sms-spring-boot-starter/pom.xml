@@ -9,7 +9,7 @@
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
-    <groupId>com.github.weasley</groupId>
+    <groupId>io.github.weasley</groupId>
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
     <version>1.0.0</version>
     <name>multiple-sms-spring-boot-starter</name>
