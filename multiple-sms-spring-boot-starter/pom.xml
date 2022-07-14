@@ -212,18 +212,18 @@
                     <tags>
                         <tag>
                             <name>date</name>
-                            <placement>a</placement>
-                            <head>忽略 'date' 标签规则</head>
+                            <placement>o</placement>
+                            <head>Ignore 'date' tag rule</head>
                         </tag>
                         <tag>
                             <name>apiNote</name>
-                            <placement>a</placement>
-                            <head>忽略 'apiNote' 标签规则</head>
+                            <placement>o</placement>
+                            <head>Ignore 'apiNote' tag rule</head>
                         </tag>
                         <tag>
                             <name>implNote</name>
-                            <placement>a</placement>
-                            <head>忽略 'implNote' 标签规则</head>
+                            <placement>o</placement>
+                            <head>Ignore 'implNote' tag rule</head>
                         </tag>
                     </tags>
                 </configuration>
