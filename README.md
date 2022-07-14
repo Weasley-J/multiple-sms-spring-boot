@@ -439,7 +439,7 @@ public enum SmsSupplier {
 ```xml
 <!-- multiple-sms-spring-boot-starter -->
 <dependency>
-    <groupId>cn.alphahub.multiple.sms</groupId>
+    <groupId>com.github.weasley</groupId>
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
     <version>1.0.0-SNAPSHOT</version>
 </dependency>
