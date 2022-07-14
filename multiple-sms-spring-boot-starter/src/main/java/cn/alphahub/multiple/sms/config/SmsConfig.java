@@ -136,6 +136,7 @@ public class SmsConfig {
 
     /**
      * 线程池
+     *
      * @param threadPoolProperties 线程池配置参数
      * @return thread pool executor
      */
