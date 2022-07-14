@@ -13,17 +13,48 @@
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
     <version>1.0.0</version>
     <name>multiple-sms-spring-boot-starter</name>
-    <description>多短信模板、多短信供应商支持springboot starter</description>
+    <description>
+        Multiple SMS Templates and Multiple SMS Providers for spring-boot, You can easily use
+        multiple-sms-spring-boot-starter to send SMS for users by @SMS annotation and SmsTemplat in you projects.
+    </description>
+
+    <licenses>
+        <license>
+            <name>MIT License</name>
+            <url>https://www.opensource.org/licenses/mit-license.php</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Weasle J</name>
+            <email>1432689025@qq.com</email>
+            <url>https://github.com/Weasley-J</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/Weasley-J/multiple-sms-spring-boot</url>
+        <connection>https://github.com/Weasley-J/multiple-sms-spring-boot.git</connection>
+        <developerConnection>https://github.com/Weasley-J/multiple-sms-spring-boot</developerConnection>
+    </scm>
 
     <properties>
         <spring-boot.version>2.6.5</spring-boot.version>
-        <lombok.version>1.18.22</lombok.version>
+        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+        <lombok.version>1.18.24</lombok.version>
         <hutool-all.version>5.7.22</hutool-all.version>
         <aliyun.sdk.version>4.6.0</aliyun.sdk.version>
         <aliyun.dysmsapi.version>2.2.1</aliyun.dysmsapi.version>
         <tencentcloud.sms.version>3.1.367</tencentcloud.sms.version>
         <jdcloud.sms.version>1.3.3</jdcloud.sms.version>
         <qiniu.sms.version>[7.8.0, 7.9.99]</qiniu.sms.version>
+        <nexus-staging.version>1.6.13</nexus-staging.version>
+        <maven-source.version>3.2.1</maven-source.version>
+        <maven-javadoc.version>3.4.0</maven-javadoc.version>
+        <maven-gpg.version>3.0.1</maven-gpg.version>
     </properties>
 
     <dependencies>
@@ -119,6 +150,17 @@
         </dependency>
     </dependencies>
 
+    <distributionManagement>
+        <snapshotRepository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+        </snapshotRepository>
+        <repository>
+            <id>ossrh</id>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <build>
         <finalName>${project.artifactId}</finalName>
         <resources>
@@ -129,6 +171,66 @@
                 </includes>
             </resource>
         </resources>
+        <plugin>
+            <groupId>org.sonatype.plugins</groupId>
+            <artifactId>nexus-staging-maven-plugin</artifactId>
+            <version>${nexus-staging.version}</version>
+            <extensions>true</extensions>
+            <configuration>
+                <serverId>ossrh</serverId>
+                <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
+                <autoReleaseAfterClose>false</autoReleaseAfterClose>
+            </configuration>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-source-plugin</artifactId>
+            <version>${maven-source.version}</version>
+            <executions>
+                <execution>
+                    <id>attach-sources</id>
+                    <goals>
+                        <goal>jar-no-fork</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-javadoc-plugin</artifactId>
+            <version>${maven-javadoc.version}</version>
+            <configuration>
+                <show>private</show>
+                <nohelp>true</nohelp>
+                <charset>UTF-8</charset>
+                <encoding>UTF-8</encoding>
+                <docencoding>UTF-8</docencoding>
+                <additionalparam>-Xdoclint:none</additionalparam>
+            </configuration>
+            <executions>
+                <execution>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>jar</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-gpg-plugin</artifactId>
+            <version>${maven-gpg.version}</version>
+            <executions>
+                <execution>
+                    <id>sign-artifacts</id>
+                    <phase>verify</phase>
+                    <goals>
+                        <goal>sign</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
     </build>
 
 </project>
