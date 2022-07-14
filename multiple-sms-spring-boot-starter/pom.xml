@@ -11,7 +11,7 @@
 
     <groupId>io.github.weasley-j</groupId>
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
-    <version>1.0.1</version>
+    <version>1.0.2</version>
     <name>multiple-sms-spring-boot-starter</name>
     <url>https://github.com/Weasley-J/multiple-sms-spring-boot</url>
 
