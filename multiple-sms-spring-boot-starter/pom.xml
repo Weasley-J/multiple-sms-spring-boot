@@ -206,11 +206,28 @@
                     <charset>UTF-8</charset>
                     <encoding>UTF-8</encoding>
                     <docencoding>UTF-8</docencoding>
-                    <additionalparam>-Xdoclint:none</additionalparam>
+                    <tags>
+                        <tag>
+                            <name>date</name>
+                            <placement>a</placement>
+                            <head>忽略 'date' 标签规则</head>
+                        </tag>
+                        <tag>
+                            <name>apiNote</name>
+                            <placement>a</placement>
+                            <head>忽略 'apiNote' 标签规则</head>
+                        </tag>
+                        <tag>
+                            <name>implNote</name>
+                            <placement>a</placement>
+                            <head>忽略 'implNote' 标签规则</head>
+                        </tag>
+                    </tags>
                 </configuration>
                 <executions>
                     <execution>
-                        <phase>package</phase>
+                        <id>attach-javadoc</id>
+                        <phase>compile</phase>
                         <goals>
                             <goal>jar</goal>
                         </goals>

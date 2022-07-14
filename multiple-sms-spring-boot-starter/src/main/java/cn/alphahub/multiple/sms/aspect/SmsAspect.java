@@ -35,12 +35,11 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsTemplateProperties;
  * 多模板短信配置切面
  * <p>
  * 关于注解{@code @SMS}作用在类和方法的优先级问题
- *     <ul>
- *         <li>1. 当注解{@code @SMS}作用类上时，该类所有短信模板方法发送短信的客户端都以注解{@code @SMS}指定为准客户端</li>
- *         <li>2. 当注解{@code @SMS}作用方法上时，该方法短信客户端的为注解{@code @SMS}指定的短信客户端</li>
- *         <li>3. 当注解{@code @SMS}同时作用类，和方法上时，方法上注解{@code @SMS}的优先级高于类上{@code @SMS}注解的优先级</li>
- *     </ul>
- * </p>
+ * <ul>
+ *     <li>1. 当注解{@code @SMS}作用类上时，该类所有短信模板方法发送短信的客户端都以注解{@code @SMS}指定为准客户端</li>
+ *     <li>2. 当注解{@code @SMS}作用方法上时，该方法短信客户端的为注解{@code @SMS}指定的短信客户端</li>
+ *     <li>3. 当注解{@code @SMS}同时作用类，和方法上时，方法上注解{@code @SMS}的优先级高于类上{@code @SMS}注解的优先级</li>
+ * </ul>
  *
  * @author lwj
  * @version 1.0
@@ -90,6 +89,10 @@ public class SmsAspect {
 
     /**
      * 目标方法执行之前执行
+     *
+     * @param point 提供对连接点可用状态和有关它的静态信息的反射访问
+     * @param sms   多模板短信注解
+     * @throws Exception 异常
      */
     @Before("pointcutOnProxyClass() && @within(sms)")
     public void beforeOnProxyClass(JoinPoint point, SMS sms) throws Exception {
@@ -106,6 +109,8 @@ public class SmsAspect {
      * 目标方法执行之后必定执行(无论是否报错)
      * <p>
      * 目标方法同时需要{@code @SMS}注解的修饰，并且这里（通知）的形参名要与上面注解中的一致
+     *
+     * @param sms 多模板短信注解
      */
     @After("pointcutOnProxyClass() && @within(sms)")
     public void afterOnProxyClass(SMS sms) {
@@ -116,6 +121,9 @@ public class SmsAspect {
      * 目标方法抛出异常后执行
      * <p>
      * 目标方法同时需要{@code @SMS}注解的修饰，并且这里（通知）的形参名要与上面注解中的一致,可以声明来获取目标方法抛出的异常
+     *
+     * @param sms       多模板短信注解
+     * @param throwable 异常
      */
     @AfterThrowing(pointcut = "pointcutOnProxyClass() && @within(sms)", throwing = "throwable")
     public void afterThrowingOnProxyClass(SMS sms, Throwable throwable) {
@@ -136,6 +144,10 @@ public class SmsAspect {
 
     /**
      * 目标方法执行之前执行
+     *
+     * @param point 切入点
+     * @param sms   多模板短信注解
+     * @throws Exception 异常
      */
     @Before("pointcutOnProxyMethod() && @annotation(sms)")
     public void beforeOnProxyMethod(JoinPoint point, SMS sms) throws Exception {
@@ -155,6 +167,10 @@ public class SmsAspect {
 
     /**
      * 环绕通知
+     *
+     * @param point 切入点
+     * @return proceed object
+     * @throws Throwable throwable
      */
     @Around("pointcutOnProxyMethod()")
     public Object aroundOnProxyMethod(ProceedingJoinPoint point) throws Throwable {
@@ -170,6 +186,8 @@ public class SmsAspect {
      * 目标方法执行之后必定执行(无论是否报错)
      * <p>
      * 目标方法同时需要{@code @SMS}注解的修饰，并且这里（通知）的形参名要与上面注解中的一致
+     *
+     * @param sms 多模板短信注解
      */
     @After("pointcutOnProxyMethod() && @annotation(sms)")
     public void afterOnProxyMethod(SMS sms) {
@@ -181,6 +199,9 @@ public class SmsAspect {
      * 目标方法有返回值且正常返回后执行
      * <p>
      * 这里切入点方法的形参名{@code pointcut()}要与上面注解中的一致
+     *
+     * @param point        join point
+     * @param responseData response data
      */
     @AfterReturning(pointcut = "pointcutOnProxyMethod()", returning = "responseData")
     public void afterReturningOnProxyMethod(JoinPoint point, Object responseData) {
@@ -197,6 +218,9 @@ public class SmsAspect {
      * 目标方法抛出异常后执行
      * <p>
      * 目标方法同时需要{@code @SMS}注解的修饰，并且这里（通知）的形参名要与上面注解中的一致,可以声明来获取目标方法抛出的异常
+     *
+     * @param sms       多模板短信注解
+     * @param throwable throwable
      */
     @AfterThrowing(pointcut = "pointcutOnProxyMethod() && @annotation(sms)", throwing = "throwable")
     public void afterThrowingOnProxyMethod(SMS sms, Throwable throwable) {

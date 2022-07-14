@@ -41,6 +41,7 @@ public @interface SMS {
     /**
      * 短信供应商，默认短信供应商: 阿里云
      *
+     * @return SmsSupplier enum
      * @apiNote 如果需要拓展其他短信供应商，见枚举{@code SmsSupplier}
      * @see SmsSupplier
      */
