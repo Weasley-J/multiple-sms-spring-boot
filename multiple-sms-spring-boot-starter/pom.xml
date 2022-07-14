@@ -28,7 +28,7 @@
 
     <developers>
         <developer>
-            <name>Weasle J</name>
+            <name>Weasley J</name>
             <email>1432689025@qq.com</email>
             <url>https://github.com/Weasley-J</url>
         </developer>
@@ -153,11 +153,15 @@
     <distributionManagement>
         <snapshotRepository>
             <id>ossrh</id>
+            <name>Sonatype Snapshot Repository</name>
             <url>https://s01.oss.sonatype.org/content/repositories/snapshots</url>
+            <layout>default</layout>
         </snapshotRepository>
         <repository>
             <id>ossrh</id>
+            <name>Sonatype Release Repository</name>
             <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+            <layout>default</layout>
         </repository>
     </distributionManagement>
 
