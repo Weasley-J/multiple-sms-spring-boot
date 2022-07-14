@@ -11,7 +11,7 @@
 
     <groupId>com.github.weasley</groupId>
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>1.0.0</version>
     <name>multiple-sms-spring-boot-starter</name>
     <description>多短信模板、多短信供应商支持springboot starter</description>
 
