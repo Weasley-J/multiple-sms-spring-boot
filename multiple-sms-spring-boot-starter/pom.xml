@@ -15,8 +15,31 @@
     <name>multiple-sms-spring-boot-starter</name>
     <description>
         Multiple SMS Templates and Multiple SMS Providers for spring-boot, You can easily use
-        multiple-sms-spring-boot-starter to send SMS for users by @SMS annotation and SmsTemplat in you projects.
+        multiple-sms-spring-boot-starter to send SMS for users by @SMS annotation and SmsTemplate in you projects.
     </description>
+    <url>https://github.com/Weasley-J/multiple-sms-spring-boot</url>
+
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo</distribution>
+        </license>
+    </licenses>
+
+    <developers>
+        <developer>
+            <name>Weasley J</name>
+            <email>1432689025@qq.com</email>
+            <url>https://github.com/Weasley-J</url>
+        </developer>
+    </developers>
+
+    <scm>
+        <url>https://github.com/Weasley-J/multiple-sms-spring-boot.git</url>
+        <connection>https://github.com/Weasley-J/multiple-sms-spring-boot.git</connection>
+        <developerConnection>https://github.com/Weasley-J/multiple-sms-spring-boot</developerConnection>
+    </scm>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -125,30 +148,6 @@
             <version>${qiniu.sms.version}</version>
         </dependency>
     </dependencies>
-
-    <url>https://github.com/Weasley-J/multiple-sms-spring-boot</url>
-
-    <licenses>
-        <license>
-            <name>MIT License</name>
-            <url>https://www.opensource.org/licenses/mit-license.php</url>
-            <distribution>repo</distribution>
-        </license>
-    </licenses>
-
-    <developers>
-        <developer>
-            <name>Weasley J</name>
-            <email>1432689025@qq.com</email>
-            <url>https://github.com/Weasley-J</url>
-        </developer>
-    </developers>
-
-    <scm>
-        <url>https://github.com/Weasley-J/multiple-sms-spring-boot.git</url>
-        <connection>scm:git:https://github.com/Weasley-J/multiple-sms-spring-boot.git</connection>
-        <developerConnection>scm:git:https://github.com/Weasley-J/multiple-sms-spring-boot.git</developerConnection>
-    </scm>
 
     <distributionManagement>
         <snapshotRepository>

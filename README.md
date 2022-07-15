@@ -1,4 +1,18 @@
-# 多短信模板&多短信供应商`spring-boot-starter`
+# multiple-sms-spring-boot-starter
+
+
+
+**多短信模板&多短信供应商**， 可拔插，可拓展，支持使用者在同一个项目中给予注解驱动使用不同的短信模板实现，本项目已提交至maven中央仓库，你可以直接在项目`pom.xml`中引入使用, 找个[最新版](https://search.maven.org/search?q=multiple-sms-spring-boot-starter)引入坐标即可:
+
+```xml
+<dependency>
+  <groupId>io.github.weasley-j</groupId>
+  <artifactId>multiple-sms-spring-boot-starter</artifactId>
+  <version>${multiple-email.verison}</version>
+</dependency>
+```
+
+
 
 > `multiple-sms-spring-boot-starter`启动器解决的事：
 >
@@ -6,10 +20,11 @@
 
 **requirement**
 
-| item        | requirement            | remark |
-| ----------- | ---------------------- | ------ |
-| JDK         | JDK1.8 or latest       |        |
-| Environment | Spring Web Application |        |
+| item        | requirement                           | remark |
+| ----------- | ------------------------------------- | ------ |
+| SpringBoot  | 2.2.0.RELEASE  <= version <= 3.0.0-M3 |        |
+| JDK         | JDK1.8 or latest                      |        |
+| Environment | Spring Web Application                |        |
 
 **project tree map**
 
