@@ -3,6 +3,7 @@ package cn.alphahub.multiple.sms.config;
 import cn.alphahub.multiple.sms.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
 import cn.alphahub.multiple.sms.annotation.SMS;
+import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.impl.DefaultAliCloudSmsClientImpl;
 import cn.alphahub.multiple.sms.impl.DefaultHuaweiCloudSmsClientImpl;
@@ -62,7 +63,7 @@ public class SmsConfig {
      * @param templateName 配置文件里指定的短信模板名称
      * @return 短信模板名称
      */
-    public String decorateTemplateName(@NotNull SmsSupplier smsSupplier, @NotEmpty String templateName) {
+    public static String decorateTemplateName(@NotNull SmsSupplier smsSupplier, @NotEmpty String templateName) {
         return smsSupplier.getCode() + ":" + templateName;
     }
 
@@ -135,6 +136,20 @@ public class SmsConfig {
     }
 
     /**
+     * sms wrapper
+     *
+     * @param smsPropertiesMap 默认短信模板配置元数据Map
+     * @param smsClientMap     多模板、多供应商短信发送实例对象map集合
+     * @return SmsWrapper
+     */
+    @Bean
+    @DependsOn({"smsPropertiesMap", "smsClientMap"})
+    public SmsWrapper smsWrapper(@Qualifier("smsPropertiesMap") Map<String, SmsTemplateProperties> smsPropertiesMap,
+                                 @Qualifier("smsClientMap") Map<String, SmsClient> smsClientMap) {
+        return new SmsWrapper(smsPropertiesMap, smsClientMap);
+    }
+
+    /**
      * 线程池
      *
      * @param threadPoolProperties 线程池配置参数
@@ -150,8 +165,7 @@ public class SmsConfig {
                 threadPoolProperties.getTimeUnit(),
                 new LinkedBlockingQueue<>(threadPoolProperties.getCapacity()),
                 Executors.defaultThreadFactory(),
-                new ThreadPoolExecutor.AbortPolicy()
-        );
+                new ThreadPoolExecutor.AbortPolicy());
     }
 
     /**

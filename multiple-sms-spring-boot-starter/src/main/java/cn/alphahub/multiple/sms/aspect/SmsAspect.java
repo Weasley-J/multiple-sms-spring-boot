@@ -4,8 +4,10 @@ import cn.alphahub.multiple.sms.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.config.SmsConfig;
+import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.hutool.core.date.DateUtil;
+import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -25,11 +27,9 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
 import java.util.Date;
-import java.util.Map;
 import java.util.Objects;
 
 import static cn.alphahub.multiple.sms.SmsClient.DefaultSmsClientPlaceholder;
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsTemplateProperties;
 
 /**
  * 多模板短信配置切面
@@ -43,7 +43,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsTemplateProperties;
  *
  * @author lwj
  * @version 1.0
- * @apiNote <a href='https://blog.csdn.net/genius_wolf/article/details/109358153'>{@code @Aspect}注解在类上不生效的帮助链接</a>
+ * @apiNote <a href="https://blog.csdn.net/genius_wolf/article/details/109358153">{@code @Aspect}注解在类上不生效的帮助链接</a>
  * @date 2021-09-24
  */
 @Slf4j
@@ -55,29 +55,27 @@ public class SmsAspect {
      * sms client thread local
      */
     private static final ThreadLocal<SmsClient> SMS_CLIENT_THREAD_LOCAL = new ThreadLocal<>();
-    /**
-     * 多模板短信配置
-     */
-    private final SmsConfig smsConfig;
-    /**
-     * 多模板、多供应商短信发送实例对象map集合
-     */
-    private final Map<String, SmsClient> smsClientMap;
-    /**
-     * 默认短信模板配置元数据
-     */
-    private final SmsTemplateProperties templateProperties;
-
-    public SmsAspect(SmsConfig smsConfig, Map<String, SmsClient> smsClientMap, SmsTemplateProperties templateProperties) {
-        this.smsConfig = smsConfig;
-        this.smsClientMap = smsClientMap;
-        this.templateProperties = templateProperties;
-    }
-
 
     /////////////////////////////////////////////////////////////
     //                 注解@SMS作用在类上是AOP切入点
     /////////////////////////////////////////////////////////////
+
+    /**
+     * 获取短信客户端实例
+     *
+     * @return instance of SmsClient
+     * @see cn.alphahub.multiple.sms.SmsClient
+     */
+    public static SmsClient getSmsClient() {
+        SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
+        if (null == smsClient) {
+            SmsConfig.SmsTemplateProperties properties = SpringUtil.getBean(SmsConfig.SmsTemplateProperties.class);
+            SmsSupplier smsSupplier = properties.getSmsSupplier();
+            String templateName = properties.getTemplateName();
+            smsClient = SpringUtil.getBean(SmsWrapper.class).getSmsClient(smsSupplier, templateName);
+        }
+        return smsClient;
+    }
 
     /**
      * 定义切入点方法
@@ -96,13 +94,11 @@ public class SmsAspect {
      */
     @Before("pointcutOnProxyClass() && @within(sms)")
     public void beforeOnProxyClass(JoinPoint point, SMS sms) throws Exception {
-        SmsClient smsClient = smsClientMap.get(smsConfig.decorateTemplateName(sms.supplier(), sms.name()));
+        SmsClient smsClient = getSmsClient(sms);
         if (Objects.nonNull(sms.invokeClass()) && sms.invokeClass() != DefaultSmsClientPlaceholder.class) {
             SmsClient instance = sms.invokeClass().getDeclaredConstructor().newInstance();
             SMS_CLIENT_THREAD_LOCAL.set(instance);
-        } else {
-            SMS_CLIENT_THREAD_LOCAL.set(smsClient);
-        }
+        } else SMS_CLIENT_THREAD_LOCAL.set(smsClient);
     }
 
     /**
@@ -114,8 +110,12 @@ public class SmsAspect {
      */
     @After("pointcutOnProxyClass() && @within(sms)")
     public void afterOnProxyClass(SMS sms) {
-        SMS_CLIENT_THREAD_LOCAL.remove();
+        if (SMS_CLIENT_THREAD_LOCAL.get() != null) SMS_CLIENT_THREAD_LOCAL.remove();
     }
+
+    /////////////////////////////////////////////////////////////
+    //              注解@SMS作用在方法上时AOP切入点
+    /////////////////////////////////////////////////////////////
 
     /**
      * 目标方法抛出异常后执行
@@ -129,10 +129,6 @@ public class SmsAspect {
     public void afterThrowingOnProxyClass(SMS sms, Throwable throwable) {
         log.error("{}", throwable.getLocalizedMessage());
     }
-
-    /////////////////////////////////////////////////////////////
-    //              注解@SMS作用在方法上时AOP切入点
-    /////////////////////////////////////////////////////////////
 
     /**
      * 定义切入点方法
@@ -151,18 +147,13 @@ public class SmsAspect {
      */
     @Before("pointcutOnProxyMethod() && @annotation(sms)")
     public void beforeOnProxyMethod(JoinPoint point, SMS sms) throws Exception {
-        log.info("before");
-        ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
-        String templateName = smsConfig.decorateTemplateName(sms.supplier(), sms.name());
-        SmsClient smsClient = smsClientMap.get(templateName);
+        log.info("before.");
+        SmsClient smsClient = getSmsClient(sms);
         // 自定义实现发送发送短信的实现类不为空时，将优先使用自定义短信实现
         if (Objects.nonNull(sms.invokeClass()) && sms.invokeClass() != DefaultSmsClientPlaceholder.class) {
             SmsClient instance = sms.invokeClass().getDeclaredConstructor().newInstance();
             SMS_CLIENT_THREAD_LOCAL.set(instance);
-        } else {
-            SMS_CLIENT_THREAD_LOCAL.set(smsClient);
-        }
+        } else SMS_CLIENT_THREAD_LOCAL.set(smsClient);
     }
 
     /**
@@ -192,7 +183,7 @@ public class SmsAspect {
     @After("pointcutOnProxyMethod() && @annotation(sms)")
     public void afterOnProxyMethod(SMS sms) {
         log.info("after");
-        SMS_CLIENT_THREAD_LOCAL.remove();
+        if (SMS_CLIENT_THREAD_LOCAL.get() != null) SMS_CLIENT_THREAD_LOCAL.remove();
     }
 
     /**
@@ -211,8 +202,11 @@ public class SmsAspect {
         Method method = signature.getMethod();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
         HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
-
     }
+
+    /////////////////////////////////////////////////////////////
+    //                  END AOP CONSTRUCTION
+    /////////////////////////////////////////////////////////////
 
     /**
      * 目标方法抛出异常后执行
@@ -227,24 +221,13 @@ public class SmsAspect {
         log.error("{}", throwable.getLocalizedMessage());
     }
 
-    /////////////////////////////////////////////////////////////
-    //                  END AOP CONSTRUCTION
-    /////////////////////////////////////////////////////////////
-
     /**
      * 获取短信客户端实例
      *
-     * @return instance of SmsClient
-     * @see cn.alphahub.multiple.sms.SmsClient
+     * @param sms 多模板短信注解
+     * @return SmsClient
      */
-    public SmsClient getSmsClient() {
-        SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
-        if (null == smsClient) {
-            SmsSupplier smsSupplier = templateProperties.getSmsSupplier();
-            String templateName = templateProperties.getTemplateName();
-            String decorateTemplateName = smsConfig.decorateTemplateName(smsSupplier, templateName);
-            smsClient = smsClientMap.get(decorateTemplateName);
-        }
-        return smsClient;
+    public SmsClient getSmsClient(SMS sms) {
+        return SpringUtil.getBean(SmsWrapper.class).getSmsClient(sms.supplier(), sms.name());
     }
 }

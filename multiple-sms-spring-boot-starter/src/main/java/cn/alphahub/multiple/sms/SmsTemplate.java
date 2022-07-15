@@ -5,6 +5,8 @@ import cn.alphahub.multiple.sms.aspect.SmsAspect;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -34,18 +36,11 @@ import java.util.concurrent.atomic.AtomicReference;
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
 public class SmsTemplate {
     /**
-     * 多模板短信配置切面
-     */
-    private final SmsAspect smsAspect;
-    /**
      * 默认线程池
      */
-    private final ThreadPoolExecutor executor;
-
-    public SmsTemplate(SmsAspect smsAspect, ThreadPoolExecutor executor) {
-        this.smsAspect = smsAspect;
-        this.executor = executor;
-    }
+    @Autowired
+    @Qualifier("threadPoolExecutor")
+    private ThreadPoolExecutor executor;
 
     /**
      * 发送短信
@@ -54,7 +49,7 @@ public class SmsTemplate {
      * @return 短信供应商的发送短信后的返回结果
      */
     public Object send(@Valid SmsParam smsParam) {
-        SmsClient smsClient = smsAspect.getSmsClient();
+        SmsClient smsClient = SmsAspect.getSmsClient();
         AtomicReference<Object> sendResult = new AtomicReference<>();
         RequestAttributes mainThreadRequestAttributes = RequestContextHolder.getRequestAttributes();
         CompletableFuture<Object> sendResponseFuture = CompletableFuture.supplyAsync(() -> {
