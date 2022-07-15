@@ -18,14 +18,9 @@ import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Before;
 import org.aspectj.lang.annotation.Pointcut;
-import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 
-import javax.servlet.http.HttpServletRequest;
-import java.lang.reflect.Method;
 import java.util.Date;
 import java.util.Objects;
 
@@ -197,11 +192,11 @@ public class SmsAspect {
     @AfterReturning(pointcut = "pointcutOnProxyMethod()", returning = "responseData")
     public void afterReturningOnProxyMethod(JoinPoint point, Object responseData) {
         log.info("afterReturning, response data: {}", Objects.isNull(responseData) ? "response data is null." : responseData.toString());
-        Object[] args = point.getArgs();
+        /*Object[] args = point.getArgs();
         MethodSignature signature = (MethodSignature) point.getSignature();
         Method method = signature.getMethod();
         ServletRequestAttributes attributes = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
-        HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();
+        HttpServletRequest request = Objects.requireNonNull(attributes).getRequest();*/
     }
 
     /////////////////////////////////////////////////////////////

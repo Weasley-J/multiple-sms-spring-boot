@@ -79,7 +79,7 @@ import static cn.alphahub.multiple.sms.SmsTemplate.SmsParam;
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
 public class SmsServiceDemoController {
 
-    @Resource
+    @Autowired
     private SmsTemplate smsTemplate;
 
     /**
@@ -506,7 +506,7 @@ import static cn.alphahub.multiple.sms.SmsTemplate.SmsParam;
 @Service
 public class SMSAnnotateWithClassAndMethod {
 
-    @Resource
+    @Autowired
     private SmsTemplate smsTemplate;
 
     /**

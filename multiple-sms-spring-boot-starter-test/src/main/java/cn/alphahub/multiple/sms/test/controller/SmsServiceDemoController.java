@@ -6,6 +6,7 @@ import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.test.demo.MyCustomSmsClientDemoImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -30,7 +31,7 @@ import static cn.alphahub.multiple.sms.SmsTemplate.SmsParam;
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
 public class SmsServiceDemoController {
 
-    @Resource
+    @Autowired
     private SmsTemplate smsTemplate;
 
     /**
