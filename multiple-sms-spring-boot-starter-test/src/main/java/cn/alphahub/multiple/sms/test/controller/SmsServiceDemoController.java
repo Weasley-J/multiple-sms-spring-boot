@@ -6,6 +6,7 @@ import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.test.demo.MyCustomSmsClientDemoImpl;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.aop.framework.AopContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -127,4 +128,22 @@ public class SmsServiceDemoController {
     public Object sendWithCustomSmsClient(@RequestBody SmsParam smsParam) {
         return smsTemplate.send(smsParam);
     }
+
+
+    /**
+     * 自定义短信实现发送短信
+     *
+     * @param smsParam 短信参数
+     * @return 发送结果
+     */
+    @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)
+    @PostMapping("/sendWithCustomSmsClientNested")
+    public Object sendWithCustomSmsClientNested(@RequestBody SmsParam smsParam) {
+        SmsServiceDemoController currentProxy = (SmsServiceDemoController) AopContext.currentProxy();
+        Object send = smsTemplate.send(smsParam);
+        Object send0 = currentProxy.sendWithHuaweiCloud(smsParam);
+        log.info("{}", send);
+        return send;
+    }
+
 }
