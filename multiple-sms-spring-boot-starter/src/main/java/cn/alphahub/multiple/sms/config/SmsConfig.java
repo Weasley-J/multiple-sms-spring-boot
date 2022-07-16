@@ -17,12 +17,12 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.context.properties.NestedConfigurationProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
-import org.springframework.context.annotation.EnableAspectJAutoProxy;
 import org.springframework.validation.annotation.Validated;
 
 import javax.validation.Valid;
@@ -38,6 +38,11 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
+import static cn.alphahub.multiple.sms.config.SmsConfig.MultipleSmsTemplateProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfig.SmsTemplateProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfig.ThreadPoolProperties;
+
 /**
  * 多模板短信配置
  *
@@ -47,13 +52,10 @@ import java.util.concurrent.TimeUnit;
  */
 @Slf4j
 @Validated
-@Configuration
-@EnableAspectJAutoProxy(exposeProxy = true, proxyTargetClass = true)
+@Configuration(proxyBeanMethods = false)
+@ConfigurationPropertiesScan({"cn.alphahub.multiple.sms.config"})
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
-@EnableConfigurationProperties({
-        SmsConfig.SmsProperties.class, SmsConfig.SmsTemplateProperties.class,
-        SmsConfig.MultipleSmsTemplateProperties.class, SmsConfig.ThreadPoolProperties.class
-})
+@EnableConfigurationProperties({SmsProperties.class, SmsTemplateProperties.class, MultipleSmsTemplateProperties.class, ThreadPoolProperties.class})
 public class SmsConfig {
 
     /**
@@ -157,7 +159,7 @@ public class SmsConfig {
      */
     @Bean
     @ConditionalOnMissingBean(value = {ThreadPoolExecutor.class, Executor.class})
-    public ThreadPoolExecutor threadPoolExecutor(ThreadPoolProperties threadPoolProperties) {
+    public ThreadPoolExecutor smsThreadPoolExecutor(ThreadPoolProperties threadPoolProperties) {
         return new ThreadPoolExecutor(
                 threadPoolProperties.getCorePoolSize(),
                 threadPoolProperties.getMaximumPoolSize(),

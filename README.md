@@ -1,8 +1,7 @@
 # multiple-sms-spring-boot-starter
 
-
-
-**多短信模板&多短信供应商**， 可拔插，可拓展，支持使用者在同一个项目中给予注解驱动使用不同的短信模板实现，本项目已提交至maven中央仓库，你可以直接在项目`pom.xml`中引入使用, 找个[最新版](https://search.maven.org/search?q=multiple-sms-spring-boot-starter)引入坐标即可:
+**多短信模板&多短信供应商**， 可拔插，可拓展，支持使用者在同一个项目中给予注解驱动使用不同的短信模板实现，本项目已提交至maven中央仓库，你可以直接在项目`pom.xml`中引入使用,
+找个[最新版](https://search.maven.org/search?q=multiple-sms-spring-boot-starter)引入坐标即可:
 
 ```xml
 <dependency>
@@ -11,8 +10,6 @@
   <version>${multiple-email.verison}</version>
 </dependency>
 ```
-
-
 
 > `multiple-sms-spring-boot-starter`启动器解决的事：
 >
@@ -372,7 +369,8 @@ public @interface EnableMultipleSmsSupport {
 }
 ```
 
-注解`@EnableMultipleSmsSupport`作用于**类**上，用于需要发送短信的**web应用**启用短信支持，并自动装配配置文件，只需要在发送短信的服务的`yml`配置文件中配置`3.1`的短信`AK`、`SK`等数据即可，
+注解`@EnableMultipleSmsSupport`作用于**类**上，用于需要发送短信的**web应用**启用短信支持，并自动装配配置文件，只需要在发送短信的服务的`yml`配置文件中配置`3.1`的短信`AK`、`SK`
+等数据即可，
 
 ### 3.3 短信提供商
 
@@ -462,11 +460,13 @@ public enum SmsSupplier {
 
 2. 在该服务的启动类上标注注解`@EnableMultipleSmsSupport`启用短信支持
 
-这是从我另一个[项目](https://github.com/Weasley-J/lejing-mall/tree/main/lejing-common/lejing-common-sms-support)里面拆离的基础组件，注解是使用本项目的的注解是: `@EnableMultipleSmsSupport`
+这是从我另一个[项目](https://github.com/Weasley-J/lejing-mall/tree/main/lejing-common/lejing-common-sms-support)
+里面拆离的基础组件，注解是使用本项目的的注解是: `@EnableMultipleSmsSupport`
 
 ![](https://alphahub-test-bucket.oss-cn-shanghai.aliyuncs.com/image/image-20211008174758732.png)
 
-3. 在`Service`或`Controller`层注入`SmsTemplate`，并在业务方法或业务类上标注注解`@SMS`发送短信，详见源码`cn.alphahub.multiple.sms.test.controller.SmsServiceDemoController`
+3. 在`Service`或`Controller`层注入`SmsTemplate`，并在业务方法或业务类上标注注解`@SMS`
+   发送短信，详见源码`cn.alphahub.multiple.sms.test.controller.SmsServiceDemoController`
 
 > 推荐注解`@SMS`作用于方法，方法级别使用。
 
@@ -552,4 +552,5 @@ public class SMSAnnotateWithClassAndMethod {
 ### 5.2 结论分享
 
 - `nested()`方法一共调用两个本类里面被注解`@SMS`标注的方法完成我们的业务需求：“当用户在乐璟商城下单成功后，平台方应当发送消息通知给**用户**和**商家**，告知用户物流情况，告知商家本单交易情况”，
-- 基于`CGLib`的动态代理调用本类方法完成业务时，使用的是增强代理类去执行业务方法，并不是本类`this`自身，因此我们需要从线程变量中获取当前`AOP`的真实代理对象，让真实代理对象调用本类（`this`）的方法执行业务，执行前后`AOP`能根据我们设定好的代理规则解析正确的业务参数完成业务需求。
+- 基于`CGLib`的动态代理调用本类方法完成业务时，使用的是增强代理类去执行业务方法，并不是本类`this`自身，因此我们需要从线程变量中获取当前`AOP`的真实代理对象，让真实代理对象调用本类（`this`
+  ）的方法执行业务，执行前后`AOP`能根据我们设定好的代理规则解析正确的业务参数完成业务需求。

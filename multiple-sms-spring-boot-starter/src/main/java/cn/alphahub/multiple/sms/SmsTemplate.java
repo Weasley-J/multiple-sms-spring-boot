@@ -6,7 +6,6 @@ import cn.hutool.json.JSONUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -39,8 +38,7 @@ public class SmsTemplate {
      * 默认线程池
      */
     @Autowired
-    @Qualifier("threadPoolExecutor")
-    private ThreadPoolExecutor executor;
+    private ThreadPoolExecutor smsThreadPoolExecutor;
 
     /**
      * 发送短信
@@ -55,7 +53,7 @@ public class SmsTemplate {
         CompletableFuture<Object> sendResponseFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(mainThreadRequestAttributes);
             return smsClient.send(smsParam.getContent(), smsParam.getPhones());
-        }, executor).whenComplete((result, throwable) -> {
+        }, smsThreadPoolExecutor).whenComplete((result, throwable) -> {
             if (Objects.nonNull(result)) {
                 sendResult.set(result);
             }
