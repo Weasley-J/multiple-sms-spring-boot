@@ -11,7 +11,7 @@
 
     <groupId>io.github.weasley-j</groupId>
     <artifactId>multiple-sms-spring-boot-starter</artifactId>
-    <version>1.0.6</version>
+    <version>1.0.7</version>
     <name>multiple-sms-spring-boot-starter</name>
     <description>
         Multiple SMS Templates and Multiple SMS Providers for spring-boot, You can easily use
@@ -36,7 +36,7 @@
     </developers>
 
     <scm>
-        <url>https://github.com/Weasley-J/multiple-sms-spring-boot.git</url>
+        <url>https://github.com/Weasley-J/multiple-sms-spring-boot</url>
         <connection>https://github.com/Weasley-J/multiple-sms-spring-boot.git</connection>
         <developerConnection>https://github.com/Weasley-J/multiple-sms-spring-boot</developerConnection>
     </scm>
