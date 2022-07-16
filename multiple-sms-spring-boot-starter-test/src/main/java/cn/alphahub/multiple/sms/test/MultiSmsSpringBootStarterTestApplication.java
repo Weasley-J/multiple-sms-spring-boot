@@ -3,6 +3,7 @@ package cn.alphahub.multiple.sms.test;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.context.annotation.EnableAspectJAutoProxy;
 
 /**
  * multiple-sms-spring-boot-starter示例验证
@@ -14,6 +15,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  */
 @SpringBootApplication
 @EnableMultipleSmsSupport
+@EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
 public class MultiSmsSpringBootStarterTestApplication {
 
     public static void main(String[] args) {
