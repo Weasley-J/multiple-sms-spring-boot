@@ -1,7 +1,6 @@
 # multiple-sms-spring-boot-starter
 
-[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/mojohaus/templating-maven-plugin.svg?label=License)](http://www.apache.org/licenses/)
-[![Maven Central](https://img.shields.io/maven-central/v/io.github.weasley-j/multiple-sms-spring-boot-starter)](https://search.maven.org/artifact/io.github.weasley-j/multiple-sms-spring-boot-starter)
+[![Apache License, Version 2.0, January 2004](https://img.shields.io/github/license/mojohaus/templating-maven-plugin.svg?label=License)](http://www.apache.org/licenses/) [![Maven Central](https://img.shields.io/maven-central/v/io.github.weasley-j/multiple-sms-spring-boot-starter.svg?label=Maven%20Central)](https://search.maven.org/search?q=g:%22io.github.weasley-j%22%20AND%20a:%22multiple-sms-spring-boot-starter%22)
 
 
 
