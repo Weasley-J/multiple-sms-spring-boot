@@ -35,6 +35,10 @@ public enum SmsSupplier {
      * 腾讯云
      */
     TENCENT("TENCENT_CLOUD", "腾讯云"),
+    /**
+     * 梦网短信平台
+     */
+    MENGWANG("MENGWANG", "梦网短信平台"),
     ;
 
     /**

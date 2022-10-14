@@ -28,7 +28,7 @@ import static cn.alphahub.multiple.sms.SmsTemplate.SmsParam;
 @RestController
 @RequestMapping("/sms/support/demo")
 @ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
-public class SmsServiceDemoController {
+public class SmsDemoController {
 
     @Autowired
     private SmsTemplate smsTemplate;
@@ -139,7 +139,7 @@ public class SmsServiceDemoController {
     @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)
     @PostMapping("/sendWithCustomSmsClientNested")
     public Object sendWithCustomSmsClientNested(@RequestBody SmsParam smsParam) {
-        SmsServiceDemoController currentProxy = (SmsServiceDemoController) AopContext.currentProxy();
+        SmsDemoController currentProxy = (SmsDemoController) AopContext.currentProxy();
         Object send = smsTemplate.send(smsParam);
         Object send0 = currentProxy.sendWithHuaweiCloud(smsParam);
         log.info("{}", send);

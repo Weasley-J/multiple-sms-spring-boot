@@ -470,7 +470,7 @@ public enum SmsSupplier {
 ![](https://alphahub-test-bucket.oss-cn-shanghai.aliyuncs.com/image/image-20211008174758732.png)
 
 3. 在`Service`或`Controller`层注入`SmsTemplate`，并在业务方法或业务类上标注注解`@SMS`
-   发送短信，详见源码`cn.alphahub.multiple.sms.test.controller.SmsServiceDemoController`
+   发送短信，详见源码`cn.alphahub.multiple.sms.test.controller.SmsDemoController`
 
 > 推荐注解`@SMS`作用于方法，方法级别使用。
 

@@ -16,10 +16,10 @@ import org.springframework.context.annotation.EnableAspectJAutoProxy;
 @SpringBootApplication
 @EnableMultipleSmsSupport
 @EnableAspectJAutoProxy(proxyTargetClass = true, exposeProxy = true)
-public class MultiSmsSpringBootStarterTestApplication {
+public class MultiSmsTestApplication {
 
     public static void main(String[] args) {
-        SpringApplication.run(MultiSmsSpringBootStarterTestApplication.class, args);
+        SpringApplication.run(MultiSmsTestApplication.class, args);
     }
 
 }
