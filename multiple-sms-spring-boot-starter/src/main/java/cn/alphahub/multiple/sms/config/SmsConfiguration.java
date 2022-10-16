@@ -31,17 +31,13 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
 import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
-import javax.annotation.Nullable;
 import javax.validation.Valid;
-import javax.validation.constraints.NotEmpty;
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -65,30 +61,9 @@ import java.util.concurrent.ThreadPoolExecutor;
 @EnableConfigurationProperties({
         SmsThreadPoolProperties.class, AliSmsProperties.class, AliSmsProperties.class,
         HuaweiSmsProperties.class, JingdongSmsProperties.class, MengwangSmsProperties.class,
-        QiniuSmsProperties.class, TencentSmsProperties.class, SmsMetadataProperties.class,
+        QiniuSmsProperties.class, TencentSmsProperties.class, SmsProperties.class,
 })
 public class SmsConfiguration {
-
-    private final ApplicationContext applicationContext;
-
-    public SmsConfiguration(ApplicationContext applicationContext) {
-        this.applicationContext = applicationContext;
-    }
-
-    /**
-     * 装饰的短信模板名称
-     *
-     * @param smsSupplier  短信供应商
-     * @param templateName 配置文件里指定的短信模板名称
-     * @return 短信模板名称
-     */
-    public static String decorateTemplateName(@NotNull SmsSupplier smsSupplier, @NotEmpty String templateName, @Nullable SmsI18n smsI18n) {
-        String name = smsSupplier.getCode() + ":" + templateName;
-        if (smsI18n != null) {
-            name = name + ":" + smsI18n.name();
-        }
-        return name;
-    }
 
     /**
      * Process sms templates map
@@ -113,7 +88,7 @@ public class SmsConfiguration {
      * @return smsTemplatesMap
      */
     @Bean(name = {"smsTemplatesMap"})
-    public Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap(@Valid SmsMetadataProperties metadataProperties) {
+    public Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap(@Valid SmsProperties metadataProperties) {
         MultipleSmsTemplatesProperties templates = metadataProperties.getMultipleTemplates();
         Map<SmsSupplier, List<? extends AbstractSmsProperties>> templatesMapping = new ConcurrentHashMap<>();
         if (null != templates) {

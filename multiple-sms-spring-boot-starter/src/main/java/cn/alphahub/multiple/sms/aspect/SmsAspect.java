@@ -3,7 +3,7 @@ package cn.alphahub.multiple.sms.aspect;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.config.DefaultSmsTemplateProperties;
-import cn.alphahub.multiple.sms.config.SmsMetadataProperties;
+import cn.alphahub.multiple.sms.config.SmsProperties;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.framework.SmsClient;
@@ -51,11 +51,11 @@ public class SmsAspect {
     private static final ThreadLocal<SmsClient> SMS_CLIENT_THREAD_LOCAL = new ThreadLocal<>();
 
     private final SmsWrapper smsWrapper;
-    private final SmsMetadataProperties smsMetadataProperties;
+    private final SmsProperties smsProperties;
 
-    public SmsAspect(SmsWrapper smsWrapper, SmsMetadataProperties smsMetadataProperties) {
+    public SmsAspect(SmsWrapper smsWrapper, SmsProperties smsProperties) {
         this.smsWrapper = smsWrapper;
-        this.smsMetadataProperties = smsMetadataProperties;
+        this.smsProperties = smsProperties;
     }
 
     /////////////////////////////////////////////////////////////
@@ -71,7 +71,7 @@ public class SmsAspect {
     public SmsClient getSmsClient() {
         SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
         if (null == smsClient) {
-            DefaultSmsTemplateProperties defaultTemplate = smsMetadataProperties.getDefaultTemplate();
+            DefaultSmsTemplateProperties defaultTemplate = smsProperties.getDefaultTemplate();
             SmsSupplier smsSupplier = defaultTemplate.getSmsSupplier();
             String templateName = defaultTemplate.getTemplateName();
             smsClient = smsWrapper.getSmsClient(smsSupplier, templateName);

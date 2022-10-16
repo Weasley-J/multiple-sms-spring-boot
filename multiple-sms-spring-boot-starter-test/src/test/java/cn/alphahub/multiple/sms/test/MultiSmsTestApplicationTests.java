@@ -1,6 +1,6 @@
 package cn.alphahub.multiple.sms.test;
 
-import cn.alphahub.multiple.sms.config.SmsMetadataProperties;
+import cn.alphahub.multiple.sms.config.SmsProperties;
 import cn.hutool.extra.spring.SpringUtil;
 import cn.hutool.json.JSONUtil;
 import org.junit.jupiter.api.Test;
@@ -11,7 +11,7 @@ class MultiSmsTestApplicationTests {
 
     @Test
     void contextLoads() {
-        System.err.println(JSONUtil.toJsonPrettyStr(SpringUtil.getBean(SmsMetadataProperties.class)));
+        System.err.println(JSONUtil.toJsonPrettyStr(SpringUtil.getBean(SmsProperties.class)));
     }
 
 }

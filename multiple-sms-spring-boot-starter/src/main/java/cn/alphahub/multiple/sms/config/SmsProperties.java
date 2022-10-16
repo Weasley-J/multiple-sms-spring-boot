@@ -14,7 +14,7 @@ import javax.validation.Valid;
  */
 @Data
 @ConfigurationProperties(prefix = "spring.sms.conf.sms-properties")
-public class SmsMetadataProperties {
+public class SmsProperties {
     /**
      * 默认短信模板
      */
