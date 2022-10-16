@@ -167,7 +167,7 @@ public class SmsConfiguration {
                 }
             }
             if (smsPropertiesMap.get(decorateTemplateName) == null)
-                throw new SmsException("默认短信模板配置不正确！");
+                throw new SmsException("默认短信模板配置不正确：" + decorateTemplateName);
             if (log.isInfoEnabled())
                 log.info("Loaded default sms template: {}", decorateTemplateName);
         }

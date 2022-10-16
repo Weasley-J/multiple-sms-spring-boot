@@ -111,7 +111,7 @@ public class SmsDemoController {
      * @param smsRequest 短信参数
      * @return 发送结果
      */
-    @SMS(templateName = "腾讯云内容短信模板", supplier = SmsSupplier.TENCENT)
+    @SMS(templateName = "腾讯短信模板1", supplier = SmsSupplier.TENCENT)
     @PostMapping("/sendWithTencentCloud")
     public AbstractSmsResponse sendWithTencentCloud(@RequestBody BaseSmsRequest smsRequest) {
         return smsTemplate.send(smsRequest);
