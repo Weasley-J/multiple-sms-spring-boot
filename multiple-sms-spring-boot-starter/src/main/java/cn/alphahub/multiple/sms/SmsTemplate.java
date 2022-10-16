@@ -2,10 +2,11 @@ package cn.alphahub.multiple.sms;
 
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.aspect.SmsAspect;
+import cn.alphahub.multiple.sms.domain.AbstractSmsResponse;
+import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.hutool.json.JSONUtil;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -13,9 +14,6 @@ import org.springframework.web.context.request.RequestAttributes;
 import org.springframework.web.context.request.RequestContextHolder;
 
 import javax.validation.Valid;
-import javax.validation.constraints.NotBlank;
-import javax.validation.constraints.NotEmpty;
-import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -24,10 +22,101 @@ import java.util.concurrent.atomic.AtomicReference;
 
 /**
  * 短信模板方法
+ * <p> 使用示例
+ * <pre>
+ * import cn.alphahub.multiple.sms.SmsTemplate;
+ * import cn.alphahub.multiple.sms.annotation.SMS;
+ * import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
+ * import cn.alphahub.multiple.sms.enums.SmsSupplier;
+ * import cn.alphahub.multiple.sms.test.demo.MyCustomSmsClientDemoImpl;
+ * import lombok.extern.slf4j.Slf4j;
+ * import org.springframework.aop.framework.AopContext;
+ * import org.springframework.beans.factory.annotation.Autowired;
+ * import org.springframework.web.bind.annotation.PostMapping;
+ * import org.springframework.web.bind.annotation.RequestBody;
+ * import org.springframework.web.bind.annotation.RequestMapping;
+ * import org.springframework.web.bind.annotation.RestController;
+ *
+ * //多短信供应商、多短信模板示例Controller
+ * {@code @Slf4j}
+ * {@code @RestController}
+ * {@code @RequestMapping("/sms/support/demo")}
+ * public class SmsDemoController {
+ *
+ *     {@code @Autowired}
+ *     private SmsTemplate smsTemplate;
+ *
+ *     //使用默认短信模板发送短信,默认模板可以注解{@code @SMS},也可以不加
+ *     {@code @PostMapping("/sendWithDefaultTemplate")}
+ *     public Object sendWithDefaultTemplate({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用阿里云短信模板1发送短信
+ *     {@code @SMS(templateName = "促销短信模板")}
+ *     {@code @PostMapping("/sendWithAliCloud1")}
+ *     public Object sendWithAliCloud1({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用阿里云短信模板2发送短信
+ *     {@code @SMS(templateName = "秒杀短信模板")}
+ *     {@code @PostMapping("/sendWithAliCloud2")}
+ *     public Object sendWithAliCloud2({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用华为云发送短信
+ *     {@code @SMS(templateName = "验证码短信模板", supplier = SmsSupplier.HUAWEI)}
+ *     {@code @PostMapping("/sendWithHuaweiCloud")}
+ *     public Object sendWithHuaweiCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用京东云发送短信
+ *     {@code @SMS(templateName = "京东云短信验证码模板", supplier = SmsSupplier.JINGDONG)}
+ *     {@code @PostMapping("/sendWithJingdongCloud")}
+ *     public Object sendWithJingdongCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用七牛云发送短信
+ *     {@code @SMS(templateName = "验证码短信模板", supplier = SmsSupplier.QINIU)}
+ *     {@code PostMapping("/sendWithQiniuCloud")}
+ *     public Object sendWithQiniuCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //使用腾讯云发送短信
+ *     {@code @SMS(templateName = "腾讯云内容短信模板", supplier = SmsSupplier.TENCENT)}
+ *     {@code @PostMapping("/sendWithTencentCloud")}
+ *     public Object sendWithTencentCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //自定义短信实现发送短信
+ *     {@code @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)}
+ *     {@code @PostMapping("/sendCustomSmsClient")}
+ *     public Object sendWithCustomSmsClient({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         return smsTemplate.send(smsRequest);
+ *     }
+ *
+ *     //自定义短信实现发送短信
+ *     {@code @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)}
+ *     {@code @PostMapping("/sendWithCustomSmsClientNested")}
+ *     public Object sendWithCustomSmsClientNested({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *         SmsDemoController1 currentProxy = (SmsDemoController1) AopContext.currentProxy();
+ *         Object send = smsTemplate.send(smsRequest);
+ *         Object send0 = currentProxy.sendWithHuaweiCloud(smsRequest);
+ *         log.info("{}", send);
+ *         return send;
+ *     }
+ *
+ * }
+ * </pre>
  *
  * @author lwj
  * @version 1.0
- * @date 2021-09-24
  */
 @Slf4j
 @Component
@@ -37,22 +126,25 @@ public class SmsTemplate {
     /**
      * 默认线程池
      */
-    @Autowired
-    private ThreadPoolExecutor smsThreadPoolExecutor;
+    protected final ThreadPoolExecutor smsThreadPoolExecutor;
+
+    public SmsTemplate(ThreadPoolExecutor smsThreadPoolExecutor) {
+        this.smsThreadPoolExecutor = smsThreadPoolExecutor;
+    }
 
     /**
      * 发送短信
      *
-     * @param smsParam 短信参数
+     * @param request 短信参数
      * @return 短信供应商的发送短信后的返回结果
      */
-    public Object send(@Valid SmsParam smsParam) {
+    public AbstractSmsResponse send(@Valid BaseSmsRequest request) {
         SmsClient smsClient = SmsAspect.getSmsClient();
-        AtomicReference<Object> sendResult = new AtomicReference<>();
+        AtomicReference<AbstractSmsResponse> sendResult = new AtomicReference<>();
         RequestAttributes mainThreadRequestAttributes = RequestContextHolder.getRequestAttributes();
-        CompletableFuture<Object> sendResponseFuture = CompletableFuture.supplyAsync(() -> {
+        CompletableFuture<AbstractSmsResponse> sendResponseFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(mainThreadRequestAttributes);
-            return smsClient.send(smsParam.getContent(), smsParam.getPhones());
+            return smsClient.send(request);
         }, smsThreadPoolExecutor).whenComplete((result, throwable) -> {
             if (Objects.nonNull(result)) {
                 sendResult.set(result);
@@ -61,27 +153,9 @@ public class SmsTemplate {
         try {
             CompletableFuture.allOf(sendResponseFuture).get();
         } catch (InterruptedException | ExecutionException e) {
-            log.error("sms param:{},{}", JSONUtil.toJsonStr(smsParam), e.getMessage(), e);
+            log.error("sms param:{},{}", JSONUtil.toJsonStr(request), e.getMessage(), e);
             Thread.currentThread().interrupt();
         }
         return sendResult.get();
-    }
-
-    /**
-     * 短信参数
-     */
-    @Data
-    public static class SmsParam implements Serializable {
-        private static final long serialVersionUID = 1L;
-        /**
-         * 短信内容、模板参数。多个以","隔开，若无模板参数，则为短信内容。模板参数的个数需要与【短信模板】对应模板的变量个数保持一致。
-         */
-        @NotBlank(message = "短信内容不能为空")
-        private String content;
-        /**
-         * 手机号里列表
-         */
-        @NotEmpty(message = "手机号不能为空")
-        private String[] phones;
     }
 }

@@ -47,4 +47,9 @@ public class AliSmsProperties extends AbstractSmsProperties {
      * 短信模板code、短信模板id
      */
     private String templateCode;
+    /**
+     * 可选配置: 模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时，此处模板中的变量的值为动态入参<br>
+     * 示例(保证顺序和ECS后台配置的一直): name,code
+     */
+    private String templateParams;
 }

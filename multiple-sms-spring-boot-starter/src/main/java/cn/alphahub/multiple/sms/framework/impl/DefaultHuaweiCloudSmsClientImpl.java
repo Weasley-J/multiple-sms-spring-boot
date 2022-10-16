@@ -1,8 +1,11 @@
-package cn.alphahub.multiple.sms.impl;
+package cn.alphahub.multiple.sms.framework.impl;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
-import cn.alphahub.multiple.sms.exception.SmsException;
+import cn.alphahub.multiple.sms.config.entity.HuaweiSmsProperties;
+import cn.alphahub.multiple.sms.domain.AbstractSmsRequest;
+import cn.alphahub.multiple.sms.domain.AbstractSmsResponse;
+import cn.alphahub.multiple.sms.domain.BaseSmsResponse;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
 import cn.hutool.http.HttpUtil;
@@ -16,6 +19,7 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.TrustManager;
 import javax.net.ssl.X509TrustManager;
+import javax.validation.Valid;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -34,7 +38,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
 
 /**
@@ -43,7 +46,6 @@ import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
  * @author lwj
  * @version 1.0
  * @apiNote <a href="https://support.huaweicloud.com/devg-msgsms/sms_04_0002.html">华为云短信帮助链接</a>，暂不支持个人用户申请
- * @date 2021-09-24
  */
 @Slf4j
 @Component
@@ -58,42 +60,23 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
      */
     private static final String AUTH_HEADER_VALUE = "WSSE realm=\"SDP\",profile=\"UsernameToken\",type=\"Appkey\"";
     /**
-     * 国内短信签名通道号或国际/港澳台短信通道号（跟据自己的配置修改）
-     */
-    private static final String SENDER = "csms12345678";
-    /**
      * 短信配置元数据
      */
-    private final SmsProperties smsProperties;
+    private final HuaweiSmsProperties smsProperties;
 
-    public DefaultHuaweiCloudSmsClientImpl(SmsProperties smsProperties) {
+    public DefaultHuaweiCloudSmsClientImpl(HuaweiSmsProperties smsProperties) {
         this.smsProperties = smsProperties;
     }
 
     @Override
-    public Object send(String content, String... phones) {
-        log.info("content:{}, phones:{}", content, JSONUtil.toJsonStr(phones));
-        if (paramsIsEmpty(content, phones)) {
-            throw new SmsException("sms content or phones is empty.");
-        }
+    public AbstractSmsResponse send(@Valid AbstractSmsRequest smsRequest) {
+        log.info("sms_request: {}", JSONUtil.toJsonStr(smsRequest));
         //必填,请参考"开发准备"获取如下数据,替换为实际值
         //APP接入地址+接口访问URI
         String url = "https://rtcsms.cn-north-1.myhuaweicloud.com:10743/sms/batchSendSms/v1";
-        //APP_Key
-        String appKey = this.smsProperties.getAppId();
-        //APP_Secret
-        String appSecret = this.smsProperties.getSecretKey();
-        //模板ID
-        String templateId = this.smsProperties.getTemplateCode();
-
-        //条件必填,国内短信关注,当templateId指定的模板类型为通用模板时生效且必填,必须是已审核通过的,与模板类型一致的签名名称
-        //国际/港澳台短信不用关注该参数
-        //签名名称
-        String signature = this.smsProperties.getSignName();
-
         //必填,全局号码格式(包含国家码),示例:+8615123456789,多个号码之间用英文逗号分隔
         //短信接收人号码
-        String receiver = StringUtils.join(phones, ",");
+        String receiver = StringUtils.join(smsRequest.getPhones(), ",");
 
         //选填,短信状态报告接收地址,推荐使用域名,为空或者不填表示不接收状态报告
         String statusCallBack = "";
@@ -103,18 +86,24 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
         // 双变量模板示例:模板内容为"您有${1}件快递请到${2}领取"时,templateParas可填写为"[\"3\",\"人民公园正门\"]"
         // 模板中的每个变量都必须赋值，且取值不能为空
         // 查看更多模板和变量规范:产品介绍>模板和变量规范
-        //模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）。
-        String templateParas = "[" + content + "]";
-
+        // 模板变量，此处以单变量验证码短信为例，请客户自行生成6位验证码，并定义为字符串类型，以杜绝首位0丢失的问题（例如：002569变成了2569）
+        String templateParas = JSONUtil.toJsonStr(smsRequest.getContents().split(","));
         //请求Body,不携带签名名称时,signature请填null
-        String body = buildRequestBody(SENDER, receiver, templateId, templateParas, statusCallBack, signature);
+        String body = buildRequestBody(smsProperties.getSender(),
+                receiver,
+                smsProperties.getTemplateId(),
+                templateParas,
+                statusCallBack,
+                smsProperties.getSignature()
+        );
+        log.info("huawei_http_body: {}", JSONUtil.toJsonStr(body));
         if (null == body || body.isEmpty()) {
             log.error("body is null.");
             return null;
         }
 
         //请求Headers中的X-WSSE参数值
-        String wsseHeader = buildWsseHeader(appKey, appSecret);
+        String wsseHeader = buildWsseHeader(smsProperties.getAppKey(), smsProperties.getAppSecret());
         if (null == wsseHeader || wsseHeader.isEmpty()) {
             log.error("wsse header is null.");
             return null;
@@ -185,7 +174,9 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
                 log.error("prams: {}", JSONUtil.toJsonStr(result.toString()), e);
             }
         }
-        return result.toString();
+        AbstractSmsResponse smsResponse = new BaseSmsResponse().setThirdResult(result);
+        log.info("sms_response: {}", JSONUtil.toJsonStr(smsResponse));
+        return smsResponse;
     }
 
 

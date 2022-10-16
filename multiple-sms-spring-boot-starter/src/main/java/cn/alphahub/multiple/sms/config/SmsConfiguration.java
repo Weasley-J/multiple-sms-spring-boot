@@ -1,6 +1,6 @@
 package cn.alphahub.multiple.sms.config;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.config.entity.AliSmsProperties;
@@ -11,11 +11,6 @@ import cn.alphahub.multiple.sms.config.entity.QiniuSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.TencentSmsProperties;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
-import cn.alphahub.multiple.sms.impl.DefaultAliCloudSmsClientImpl;
-import cn.alphahub.multiple.sms.impl.DefaultHuaweiCloudSmsClientImpl;
-import cn.alphahub.multiple.sms.impl.DefaultJingdongCloudSmsClientImpl;
-import cn.alphahub.multiple.sms.impl.DefaultQiniuCloudSmsClientImpl;
-import cn.alphahub.multiple.sms.impl.DefaultTencentCloudSmsClientImpl;
 import cn.hutool.core.collection.CollUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -47,7 +42,7 @@ import java.util.concurrent.TimeUnit;
 import static cn.alphahub.multiple.sms.config.SmsConfiguration.MultipleSmsTemplateProperties;
 import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsTemplateProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.ThreadPoolProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsThreadPoolProperties;
 
 /**
  * 多模板短信配置
@@ -63,7 +58,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfiguration.ThreadPoolPropert
 @ConfigurationPropertiesScan({"cn.alphahub.multiple.sms.config"})
 @EnableConfigurationProperties({
         SmsProperties.class, SmsTemplateProperties.class, MultipleSmsTemplateProperties.class,
-        ThreadPoolProperties.class, AliSmsProperties.class, AliSmsProperties.class,
+        SmsThreadPoolProperties.class, AliSmsProperties.class, AliSmsProperties.class,
         HuaweiSmsProperties.class, JingdongSmsProperties.class, MengwangSmsProperties.class,
         QiniuSmsProperties.class, TencentSmsProperties.class, MetadataProperties.class,
 })
@@ -129,19 +124,19 @@ public class SmsConfiguration {
         smsPropertiesMap.forEach((name, template) -> {
             switch (template.getSmsSupplier()) {
                 case ALI:
-                    smsClientMap.putIfAbsent(name, new DefaultAliCloudSmsClientImpl(template.getSmsProperties()));
+                    // smsClientMap.putIfAbsent(name, new DefaultAliCloudSmsClientImpl(template.getSmsProperties()));
                     break;
                 case HUAWEI:
-                    smsClientMap.putIfAbsent(name, new DefaultHuaweiCloudSmsClientImpl(template.getSmsProperties()));
+                    // smsClientMap.putIfAbsent(name, new DefaultHuaweiCloudSmsClientImpl(template.getSmsProperties()));
                     break;
                 case JINGDONG:
-                    smsClientMap.putIfAbsent(name, new DefaultJingdongCloudSmsClientImpl(template.getSmsProperties()));
+                    //smsClientMap.putIfAbsent(name, new DefaultJingdongCloudSmsClientImpl(template.getSmsProperties()));
                     break;
                 case QINIU:
-                    smsClientMap.putIfAbsent(name, new DefaultQiniuCloudSmsClientImpl(template.getSmsProperties()));
+                    //smsClientMap.putIfAbsent(name, new DefaultQiniuCloudSmsClientImpl(template.getSmsProperties()));
                     break;
                 case TENCENT:
-                    smsClientMap.putIfAbsent(name, new DefaultTencentCloudSmsClientImpl(template.getSmsProperties()));
+                    //smsClientMap.putIfAbsent(name, new DefaultTencentCloudSmsClientImpl(template.getSmsProperties()));
                     break;
                 default:
                     break;
@@ -168,18 +163,18 @@ public class SmsConfiguration {
     /**
      * 线程池
      *
-     * @param threadPoolProperties 线程池配置参数
+     * @param smsThreadPoolProperties 线程池配置参数
      * @return thread pool executor
      */
-    @Bean
+    @Bean(name = {"multipleSmsThreadPoolExecutor"})
     @ConditionalOnMissingBean(value = {ThreadPoolExecutor.class, Executor.class})
-    public ThreadPoolExecutor smsThreadPoolExecutor(ThreadPoolProperties threadPoolProperties) {
+    public ThreadPoolExecutor multipleSmsThreadPoolExecutor(SmsThreadPoolProperties smsThreadPoolProperties) {
         return new ThreadPoolExecutor(
-                threadPoolProperties.getCorePoolSize(),
-                threadPoolProperties.getMaximumPoolSize(),
-                threadPoolProperties.getKeepAliveTime(),
-                threadPoolProperties.getTimeUnit(),
-                new LinkedBlockingQueue<>(threadPoolProperties.getCapacity()),
+                smsThreadPoolProperties.getCorePoolSize(),
+                smsThreadPoolProperties.getMaximumPoolSize(),
+                smsThreadPoolProperties.getKeepAliveTime(),
+                smsThreadPoolProperties.getTimeUnit(),
+                new LinkedBlockingQueue<>(smsThreadPoolProperties.getCapacity()),
                 Executors.defaultThreadFactory(),
                 new ThreadPoolExecutor.AbortPolicy());
     }
@@ -259,7 +254,7 @@ public class SmsConfiguration {
      */
     @Data
     @ConfigurationProperties(prefix = "spring.sms.thread")
-    public static class ThreadPoolProperties {
+    public static class SmsThreadPoolProperties {
         /**
          * 核心线程池数量，默认：50
          */

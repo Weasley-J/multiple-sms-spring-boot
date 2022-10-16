@@ -20,4 +20,24 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 @EqualsAndHashCode(callSuper = true)
 @ConfigurationProperties(prefix = "spring.sms.conf.sms-properties.multi-templates.metadata-mapping.jingdong")
 public class JingdongSmsProperties extends AbstractSmsProperties {
+    /**
+     * 短信accessKeyId
+     */
+    private String accessKeyId;
+    /**
+     * 短信secretAccessKey
+     */
+    private String secretAccessKey;
+    /**
+     * 短信签名id
+     */
+    private String signId;
+    /**
+     * 短信模板ID
+     */
+    private String templateId;
+    /**
+     * 区域
+     */
+    private String region = "cn-north-1";
 }

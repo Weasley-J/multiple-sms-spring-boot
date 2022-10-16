@@ -1,7 +1,11 @@
-package cn.alphahub.multiple.sms.impl;
+package cn.alphahub.multiple.sms.framework.impl;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
+import cn.alphahub.multiple.sms.config.entity.AliSmsProperties;
+import cn.alphahub.multiple.sms.domain.AbstractSmsRequest;
+import cn.alphahub.multiple.sms.domain.AbstractSmsResponse;
+import cn.alphahub.multiple.sms.domain.BaseSmsResponse;
 import cn.alphahub.multiple.sms.exception.SmsException;
 import cn.hutool.json.JSONUtil;
 import com.aliyuncs.CommonRequest;
@@ -17,17 +21,16 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
+import javax.validation.Valid;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
 import java.util.Map;
-
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 
 /**
  * 阿里云短信实现
  *
  * @author lwj
  * @version 1.0
- * @date 2021-09-24
  */
 @Slf4j
 @Component
@@ -48,25 +51,31 @@ public class DefaultAliCloudSmsClientImpl implements SmsClient {
     /**
      * 短信配置元数据
      */
-    private final SmsProperties smsProperties;
+    private final AliSmsProperties smsProperties;
 
-    public DefaultAliCloudSmsClientImpl(SmsProperties smsProperties) {
+    public DefaultAliCloudSmsClientImpl(AliSmsProperties smsProperties) {
         this.smsProperties = smsProperties;
     }
 
     @Override
-    public Object send(String content, String... phones) {
-        log.info("content:{}, phones:{}", content, JSONUtil.toJsonStr(phones));
-        if (paramsIsEmpty(content, phones)) {
-            throw new SmsException("sms content or phones is empty.");
-        }
-
+    public AbstractSmsResponse send(@Valid AbstractSmsRequest smsRequest) {
+        log.info("sms_request: {}", JSONUtil.toJsonStr(smsRequest));
         CommonResponse response = new CommonResponse();
 
-        // 可选:模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时,此处的值为
-        Map<String, Object> templateParamMap = new HashMap<>(5);
-        templateParamMap.put("code", content);
-
+        // 可选: 模板中的变量替换JSON串,如模板内容为"亲爱的${name},您的验证码为${code}"时, 此处的值为动态获取
+        Map<String, Object> templateParamMap = new LinkedHashMap<>();
+        // templateParamMap.put("name", "张三");
+        // templateParamMap.put("code", "123456");
+        if (StringUtils.isNotBlank(smsProperties.getTemplateParams())) {
+            String[] templateParams = StringUtils.split(smsProperties.getTemplateParams(), ",");
+            String[] templateContents = StringUtils.split(smsRequest.getContents(), ",");
+            if (templateParams.length != templateContents.length) {
+                throw new SmsException("'模板中的变量的个数'与'模板中变量个数对应的值'的数量不一致！请检查入参：parameters=" + Arrays.toString(templateParams) + ", templateContents=" + Arrays.toString(templateContents));
+            }
+            for (int i = 0; i < templateParams.length; i++) {
+                templateParamMap.put(templateParams[i], templateContents[i]);
+            }
+        }
         CommonRequest request = new CommonRequest();
         request.setSysMethod(MethodType.POST);
         request.setSysDomain(DOMAIN);
@@ -77,17 +86,19 @@ public class DefaultAliCloudSmsClientImpl implements SmsClient {
         // 支持对多个手机号码发送短信，手机号码之间以英文逗号","分隔。上限为1000个手机号码。批量调用相对于单条调用及时性稍有延迟。验证码类型短信，建议使用单独发送的方式。
         request.putQueryParameter("SignName", smsProperties.getSignName());
         request.putQueryParameter("TemplateCode", smsProperties.getTemplateCode());
-        request.putQueryParameter("PhoneNumbers", StringUtils.join(phones, ","));
+        request.putQueryParameter("PhoneNumbers", StringUtils.join(smsRequest.getPhones(), ","));
         request.putQueryParameter("TemplateParam", JSONUtil.toJsonStr(templateParamMap));
 
         try {
             response = this.getAcsClient().getCommonResponse(request);
         } catch (ClientException e) {
-            log.error("{},{}发送短信异常:{}", JSONUtil.toJsonStr(phones), content, e.getMessage(), e);
+            log.error("{} 发送短信异常:{}", JSONUtil.toJsonStr(smsRequest), e.getMessage(), e);
         }
         log.info("发送短信状态:{}", JSONUtil.toJsonStr(response.getData()));
 
-        return response;
+        AbstractSmsResponse smsResponse = new BaseSmsResponse().setThirdResult(response);
+        log.info("sms_response: {}", JSONUtil.toJsonStr(smsResponse));
+        return smsResponse;
     }
 
     /**

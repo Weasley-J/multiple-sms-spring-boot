@@ -1,8 +1,8 @@
 package cn.alphahub.multiple.sms.annotation;
 
 
-import cn.alphahub.multiple.sms.SmsClient;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 
 import java.lang.annotation.Documented;
 import java.lang.annotation.ElementType;
@@ -10,8 +10,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static cn.alphahub.multiple.sms.SmsClient.DefaultSmsClientPlaceholder;
-
+import static cn.alphahub.multiple.sms.framework.SmsClient.DefaultSmsClientPlaceholder;
 
 /**
  * 多模板短信注解
@@ -36,7 +35,7 @@ public @interface SMS {
      *
      * @return 短信模板名称
      */
-    String name() default DEFAULT_TEMPLATE;
+    String templateName() default DEFAULT_TEMPLATE;
 
     /**
      * 短信供应商，默认短信供应商: 阿里云
@@ -48,7 +47,7 @@ public @interface SMS {
     SmsSupplier supplier() default SmsSupplier.ALI;
 
     /**
-     * 自定义实现发送发送短信的实现类，必须显现或继承{@code SmsClient}接口
+     * 自定义实现发送发送短信的实现类，必须显现或继承{@code AbstractMengwangSmsClient}接口
      *
      * @return 发送短信的实现类class
      * @apiNote 当指定自定义短信发送类时将优先采用自定义短信发送实现完成发送短信的逻辑

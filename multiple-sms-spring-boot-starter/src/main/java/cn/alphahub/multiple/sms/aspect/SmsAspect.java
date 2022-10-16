@@ -1,6 +1,6 @@
 package cn.alphahub.multiple.sms.aspect;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.config.SmsConfiguration;
@@ -24,7 +24,7 @@ import org.springframework.stereotype.Component;
 import java.util.Date;
 import java.util.Objects;
 
-import static cn.alphahub.multiple.sms.SmsClient.DefaultSmsClientPlaceholder;
+import static cn.alphahub.multiple.sms.framework.SmsClient.DefaultSmsClientPlaceholder;
 
 /**
  * 多模板短信配置切面
@@ -58,8 +58,8 @@ public class SmsAspect {
     /**
      * 获取短信客户端实例
      *
-     * @return instance of SmsClient
-     * @see cn.alphahub.multiple.sms.SmsClient
+     * @return instance of AbstractMengwangSmsClient
+     * @see SmsClient
      */
     public static SmsClient getSmsClient() {
         SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
@@ -220,9 +220,9 @@ public class SmsAspect {
      * 获取短信客户端实例
      *
      * @param sms 多模板短信注解
-     * @return SmsClient
+     * @return AbstractMengwangSmsClient
      */
     public SmsClient getSmsClient(SMS sms) {
-        return SpringUtil.getBean(SmsWrapper.class).getSmsClient(sms.supplier(), sms.name());
+        return SpringUtil.getBean(SmsWrapper.class).getSmsClient(sms.supplier(), sms.templateName());
     }
 }

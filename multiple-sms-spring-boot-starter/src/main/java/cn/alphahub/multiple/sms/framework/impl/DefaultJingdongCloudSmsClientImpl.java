@@ -1,8 +1,11 @@
-package cn.alphahub.multiple.sms.impl;
+package cn.alphahub.multiple.sms.framework.impl;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
-import cn.alphahub.multiple.sms.exception.SmsException;
+import cn.alphahub.multiple.sms.config.entity.JingdongSmsProperties;
+import cn.alphahub.multiple.sms.domain.AbstractSmsRequest;
+import cn.alphahub.multiple.sms.domain.AbstractSmsResponse;
+import cn.alphahub.multiple.sms.domain.BaseSmsResponse;
 import cn.hutool.json.JSONUtil;
 import com.jdcloud.sdk.auth.CredentialsProvider;
 import com.jdcloud.sdk.auth.StaticCredentialsProvider;
@@ -12,13 +15,11 @@ import com.jdcloud.sdk.service.sms.model.BatchSendRequest;
 import com.jdcloud.sdk.service.sms.model.BatchSendResponse;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
+import javax.validation.Valid;
 import java.util.Arrays;
-
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 
 /**
  * 京东云短信实现
@@ -26,7 +27,6 @@ import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
  * @author lwj
  * @version 1.0
  * @implNote 京东云暂不支持申请个人账号短信
- * @date 2021-09-24
  */
 @Slf4j
 @Component
@@ -39,45 +39,39 @@ public class DefaultJingdongCloudSmsClientImpl implements SmsClient {
     /**
      * 短信配置元数据
      */
-    private final SmsProperties smsProperties;
+    private final JingdongSmsProperties smsProperties;
 
-    public DefaultJingdongCloudSmsClientImpl(SmsProperties smsProperties) {
+    public DefaultJingdongCloudSmsClientImpl(JingdongSmsProperties smsProperties) {
         this.smsProperties = smsProperties;
     }
 
     @Override
-    public Object send(String content, String... phones) {
-        log.info("content:{}, phones:{}", content, JSONUtil.toJsonStr(phones));
-        if (paramsIsEmpty(content, phones)) {
-            throw new SmsException("sms content or phones is empty.");
-        }
+    public AbstractSmsResponse send(@Valid AbstractSmsRequest smsRequest) {
+        log.info("sms_request: {}", JSONUtil.toJsonStr(smsRequest));
         BatchSendRequest request = new BatchSendRequest();
-        request.setRegionId(ObjectUtils.defaultIfNull(smsProperties.getRegionId(), REGION));
+        request.setRegionId(ObjectUtils.defaultIfNull(smsProperties.getRegion(), REGION));
         // 设置模板ID 应用管理-文本短信-短信模板 页面可以查看模板ID
-        request.setTemplateId(smsProperties.getTemplateCode());
+        request.setTemplateId(smsProperties.getTemplateId());
         // 设置签名ID 应用管理-文本短信-短信签名 页面可以查看签名ID
-        request.setSignId(smsProperties.getSignName());
+        request.setSignId(smsProperties.getSignId());
         // 设置下发手机号list
-        request.setPhoneList(Arrays.asList(phones));
+        request.setPhoneList(Arrays.asList(smsRequest.getPhones()));
         // 设置模板参数，非必传，如果模板中包含变量请填写对应参数，否则变量信息将不做替换。
-        request.setParams(Arrays.asList(StringUtils.split(content, ",")));
+        request.setParams(Arrays.asList(smsRequest.getContents().split(",")));
         BatchSendResponse response = this.getSmsClient().batchSend(request);
-        log.info("response:{}", JSONUtil.toJsonStr(response));
-        return response;
+        AbstractSmsResponse smsResponse = new BaseSmsResponse().setThirdResult(response);
+        log.info("sms_response: {}", JSONUtil.toJsonStr(smsResponse));
+        return smsResponse;
     }
 
     /**
      * 初始换京东云短信客户端
      *
-     * @return {@code com.jdcloud.sdk.service.sms.client.SmsClient}
+     * @return {@code com.jdcloud.sdk.service.sms.client.AbstractMengwangSmsClient}
      * @apiNote 普通用户ak/sk （应用管理-文本短信-概览 页面可以查看自己ak/sk）
      */
     public com.jdcloud.sdk.service.sms.client.SmsClient getSmsClient() {
-        // 请填写AccessKey ID
-        String accessKeyId = smsProperties.getAccessKey();
-        // 请填写AccessKey Secret
-        String secretAccessKey = smsProperties.getSecretKey();
-        CredentialsProvider credentialsProvider = new StaticCredentialsProvider(accessKeyId, secretAccessKey);
+        CredentialsProvider credentialsProvider = new StaticCredentialsProvider(smsProperties.getAccessKeyId(), smsProperties.getSecretAccessKey());
         return com.jdcloud.sdk.service.sms.client.SmsClient.builder()
                 .credentialsProvider(credentialsProvider)
                 //默认为HTTPS

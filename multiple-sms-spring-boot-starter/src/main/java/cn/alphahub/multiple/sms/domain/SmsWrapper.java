@@ -1,6 +1,6 @@
 package cn.alphahub.multiple.sms.domain;
 
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.config.SmsConfiguration;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import lombok.AllArgsConstructor;

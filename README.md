@@ -287,7 +287,7 @@ spring:
 #### 3.2.1 业务注解`@SMS`
 
 ```java
-import cn.alphahub.multiple.sms.SmsClient;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 
 import java.lang.annotation.Documented;
@@ -296,7 +296,7 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import static cn.alphahub.multiple.sms.SmsClient.DefaultSmsClientPlaceholder;
+import static cn.alphahub.multiple.sms.framework.SmsClient.DefaultSmsClientPlaceholder;
 
 /**
  * 多模板短信注解
@@ -443,7 +443,7 @@ public enum SmsSupplier {
 
 ### 3.4 自定义短信发送实现
 
-自定义短信发送实现需实现`cn.alphahub.multiple.sms.SmsClient`接口并覆写`send`方法。
+自定义短信发送实现需实现`cn.alphahub.multiple.sms.framework.SmsClient`接口并覆写`send`方法。
 
 ![image-20211008174003086](https://alphahub-test-bucket.oss-cn-shanghai.aliyuncs.com/image/image-20211008174003086.png)
 
