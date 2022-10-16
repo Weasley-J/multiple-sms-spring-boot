@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.test.controller;
 
 import cn.alphahub.multiple.sms.SmsTemplate;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.test.demo.MyCustomSmsClientDemoImpl;
@@ -27,7 +27,7 @@ import static cn.alphahub.multiple.sms.SmsTemplate.SmsParam;
 @Slf4j
 @RestController
 @RequestMapping("/sms/support/demo")
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class SmsDemoController {
 
     @Autowired

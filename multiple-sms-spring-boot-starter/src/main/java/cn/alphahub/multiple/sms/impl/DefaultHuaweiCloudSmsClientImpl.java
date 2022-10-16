@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.impl;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.exception.SmsParamException;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.util.IdUtil;
@@ -34,7 +34,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
 
 /**
@@ -47,7 +47,7 @@ import static javax.servlet.RequestDispatcher.ERROR_MESSAGE;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
     /**
      * 无需修改,用于格式化鉴权头域,给"X-WSSE"参数赋值
@@ -197,7 +197,7 @@ public class DefaultHuaweiCloudSmsClientImpl implements SmsClient {
      * @param templateId     templateId
      * @param templateParas  templateParas
      * @param statusCallBack statusCallBack
-     * @param signature      | 签名名称,使用国内短信通用模板时填写
+     * @param signature      签名名称,使用国内短信通用模板时填写
      * @return RequestBody
      */
     private String buildRequestBody(String sender, String receiver, String templateId, String templateParas, String statusCallBack, String signature) {

@@ -1,8 +1,14 @@
 package cn.alphahub.multiple.sms.config;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
+import cn.alphahub.multiple.sms.config.entity.AliSmsProperties;
+import cn.alphahub.multiple.sms.config.entity.HuaweiSmsProperties;
+import cn.alphahub.multiple.sms.config.entity.JingdongSmsProperties;
+import cn.alphahub.multiple.sms.config.entity.MengwangSmsProperties;
+import cn.alphahub.multiple.sms.config.entity.QiniuSmsProperties;
+import cn.alphahub.multiple.sms.config.entity.TencentSmsProperties;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.impl.DefaultAliCloudSmsClientImpl;
@@ -38,10 +44,10 @@ import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.MultipleSmsTemplateProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsTemplateProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfig.ThreadPoolProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.MultipleSmsTemplateProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsTemplateProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.ThreadPoolProperties;
 
 /**
  * 多模板短信配置
@@ -53,10 +59,15 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.ThreadPoolProperties;
 @Slf4j
 @Validated
 @Configuration(proxyBeanMethods = false)
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 @ConfigurationPropertiesScan({"cn.alphahub.multiple.sms.config"})
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
-@EnableConfigurationProperties({SmsProperties.class, SmsTemplateProperties.class, MultipleSmsTemplateProperties.class, ThreadPoolProperties.class})
-public class SmsConfig {
+@EnableConfigurationProperties({
+        SmsProperties.class, SmsTemplateProperties.class, MultipleSmsTemplateProperties.class,
+        ThreadPoolProperties.class, AliSmsProperties.class, AliSmsProperties.class,
+        HuaweiSmsProperties.class, JingdongSmsProperties.class, MengwangSmsProperties.class,
+        QiniuSmsProperties.class, TencentSmsProperties.class, MetadataProperties.class,
+})
+public class SmsConfiguration {
 
     /**
      * 装饰的短信模板名称
@@ -78,7 +89,9 @@ public class SmsConfig {
      * @apiNote 初始化短信模板配置集合为50个（包含默认短信模板）
      */
     @Bean({"smsPropertiesMap"})
-    public Map<String, SmsTemplateProperties> smsPropertiesMap(@Valid SmsTemplateProperties templateProperties, @Valid MultipleSmsTemplateProperties multiSmsTemplateProperties) {
+    public Map<String, SmsTemplateProperties> smsPropertiesMap(@Valid SmsTemplateProperties templateProperties,
+                                                               @Valid MultipleSmsTemplateProperties multiSmsTemplateProperties
+    ) {
         Map<String, SmsTemplateProperties> smsSupportMap = new ConcurrentHashMap<>();
         if (Objects.nonNull(templateProperties)) {
             templateProperties.setTemplateName(SMS.DEFAULT_TEMPLATE);
@@ -147,7 +160,8 @@ public class SmsConfig {
     @Bean
     @DependsOn({"smsPropertiesMap", "smsClientMap"})
     public SmsWrapper smsWrapper(@Qualifier("smsPropertiesMap") Map<String, SmsTemplateProperties> smsPropertiesMap,
-                                 @Qualifier("smsClientMap") Map<String, SmsClient> smsClientMap) {
+                                 @Qualifier("smsClientMap") Map<String, SmsClient> smsClientMap
+    ) {
         return new SmsWrapper(smsPropertiesMap, smsClientMap);
     }
 

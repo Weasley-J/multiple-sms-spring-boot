@@ -1,9 +1,9 @@
 package cn.alphahub.multiple.sms.aspect;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
-import cn.alphahub.multiple.sms.config.SmsConfig;
+import cn.alphahub.multiple.sms.config.SmsConfiguration;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.hutool.core.date.DateUtil;
@@ -44,7 +44,7 @@ import static cn.alphahub.multiple.sms.SmsClient.DefaultSmsClientPlaceholder;
 @Slf4j
 @Aspect
 @Component
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class SmsAspect {
     /**
      * sms client thread local
@@ -64,7 +64,7 @@ public class SmsAspect {
     public static SmsClient getSmsClient() {
         SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
         if (null == smsClient) {
-            SmsConfig.SmsTemplateProperties properties = SpringUtil.getBean(SmsConfig.SmsTemplateProperties.class);
+            SmsConfiguration.SmsTemplateProperties properties = SpringUtil.getBean(SmsConfiguration.SmsTemplateProperties.class);
             SmsSupplier smsSupplier = properties.getSmsSupplier();
             String templateName = properties.getTemplateName();
             smsClient = SpringUtil.getBean(SmsWrapper.class).getSmsClient(smsSupplier, templateName);

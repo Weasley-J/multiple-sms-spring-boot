@@ -2,7 +2,7 @@ package cn.alphahub.multiple.sms.annotation;
 
 import cn.alphahub.multiple.sms.SmsTemplate;
 import cn.alphahub.multiple.sms.aspect.SmsAspect;
-import cn.alphahub.multiple.sms.config.SmsConfig;
+import cn.alphahub.multiple.sms.config.SmsConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;
@@ -21,7 +21,7 @@ import java.lang.annotation.Target;
 @Documented
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
-@Import({SmsConfig.class, SmsAspect.class, SmsTemplate.class})
-public @interface EnableMultipleSmsSupport {
+@Import({SmsConfiguration.class, SmsAspect.class, SmsTemplate.class})
+public @interface EnableMultipleSms {
 
 }

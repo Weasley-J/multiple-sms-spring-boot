@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.impl;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.exception.SmsParamException;
 import cn.hutool.json.JSONUtil;
 import com.jdcloud.sdk.auth.CredentialsProvider;
@@ -18,7 +18,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Arrays;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 
 /**
  * 京东云短信实现
@@ -30,7 +30,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class DefaultJingdongCloudSmsClientImpl implements SmsClient {
     /**
      * 地域信息不用修改

@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.impl;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.exception.SmsParamException;
 import cn.hutool.json.JSONUtil;
 import com.aliyuncs.CommonRequest;
@@ -20,7 +20,7 @@ import org.springframework.stereotype.Component;
 import java.util.HashMap;
 import java.util.Map;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 
 /**
  * 阿里云短信实现
@@ -31,7 +31,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class DefaultAliCloudSmsClientImpl implements SmsClient {
     /**
      * 短信API产品名称(短信产品名固定, 无需修改)

@@ -1,6 +1,6 @@
 package cn.alphahub.multiple.sms;
 
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.aspect.SmsAspect;
 import cn.hutool.json.JSONUtil;
 import lombok.Data;
@@ -32,7 +32,7 @@ import java.util.concurrent.atomic.AtomicReference;
 @Slf4j
 @Component
 @Validated
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class SmsTemplate {
     /**
      * 默认线程池

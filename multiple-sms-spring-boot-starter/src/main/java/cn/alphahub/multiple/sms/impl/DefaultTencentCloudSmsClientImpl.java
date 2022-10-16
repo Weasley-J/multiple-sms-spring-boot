@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.impl;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.exception.SmsParamException;
 import cn.hutool.json.JSONUtil;
 import com.tencentcloudapi.common.Credential;
@@ -16,7 +16,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
 
 /**
  * 腾讯云短信实现
@@ -27,7 +27,7 @@ import static cn.alphahub.multiple.sms.config.SmsConfig.SmsProperties;
  */
 @Slf4j
 @Component
-@ConditionalOnBean(annotation = {EnableMultipleSmsSupport.class})
+@ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class DefaultTencentCloudSmsClientImpl implements SmsClient {
     /**
      * 添加应用后生成的实际 SdkAppId，示例如1400006666

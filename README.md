@@ -51,7 +51,7 @@
 
 ```java
 import cn.alphahub.multiple.sms.SmsTemplate;
-import cn.alphahub.multiple.sms.annotation.EnableMultipleSmsSupport;
+import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.demo.MyCustomSmsClientDemoImpl;
@@ -348,7 +348,7 @@ public @interface SMS {
 ```java
 import cn.alphahub.multiple.sms.SmsTemplate;
 import cn.alphahub.multiple.sms.aspect.SmsAspect;
-import cn.alphahub.multiple.sms.config.SmsConfig;
+import cn.alphahub.multiple.sms.config.SmsConfiguration;
 import org.springframework.context.annotation.Import;
 
 import java.lang.annotation.Documented;

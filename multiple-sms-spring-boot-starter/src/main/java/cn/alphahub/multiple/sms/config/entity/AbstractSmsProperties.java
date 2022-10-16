@@ -1,7 +1,6 @@
 package cn.alphahub.multiple.sms.config.entity;
 
 import lombok.Data;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 
 /**
  * abstract sms properties
@@ -10,6 +9,16 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
  * @version 1.0.0
  */
 @Data
-@ConfigurationProperties(prefix = "spring.sms.sms-properties.def")
 public abstract class AbstractSmsProperties {
+    /**
+     * 短信模板名称,不支持短信模板名的短信厂商可忽略此参数
+     */
+    private String templateName;
+
+    public AbstractSmsProperties(String templateName) {
+        this.templateName = templateName;
+    }
+
+    public AbstractSmsProperties() {
+    }
 }

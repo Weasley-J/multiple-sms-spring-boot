@@ -1,7 +1,7 @@
 package cn.alphahub.multiple.sms.domain;
 
 import cn.alphahub.multiple.sms.SmsClient;
-import cn.alphahub.multiple.sms.config.SmsConfig;
+import cn.alphahub.multiple.sms.config.SmsConfiguration;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,7 +11,7 @@ import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.Map;
 
-import static cn.alphahub.multiple.sms.config.SmsConfig.decorateTemplateName;
+import static cn.alphahub.multiple.sms.config.SmsConfiguration.decorateTemplateName;
 
 /**
  * 短信包装类
@@ -27,7 +27,7 @@ public class SmsWrapper {
     /**
      * 默认短信模板配置元数据
      */
-    private Map<String, SmsConfig.SmsTemplateProperties> templateProperties;
+    private Map<String, SmsConfiguration.SmsTemplateProperties> templateProperties;
     /**
      * 多模板、多供应商短信发送实例对象map集合
      */
@@ -40,7 +40,7 @@ public class SmsWrapper {
      * @param templateName 配置文件里指定的短信模板名称
      * @return SmsTemplateProperties
      */
-    public SmsConfig.SmsTemplateProperties getTemplateProperties(SmsSupplier smsSupplier, String templateName) {
+    public SmsConfiguration.SmsTemplateProperties getTemplateProperties(SmsSupplier smsSupplier, String templateName) {
         String decorateTemplateName = decorateTemplateName(smsSupplier, templateName);
         return templateProperties.get(decorateTemplateName);
     }

@@ -1,0 +1,24 @@
+spring:
+  sms:
+    conf:
+      sms-properties:
+        default-template:
+          sms-supplier: ali
+          template-name: 促销短信模板
+        multiple-templates:
+          ali:
+            [ { template-name: 促销短信模板, access-key: accessKey1, secret-key: secretKey1, region-id: regionId1, sign-name: signName1, template-code: templateCode1 },
+              { template-name: 秒杀短信模板, access-key: accessKey2, secret-key: secretKey2, region-id: regionId2, sign-name: signName2, template-code: templateCode2 } ]
+          huawei:
+            [ { template-name: '华为SMS模板1', sender: '国内短信签名通道号或国际/港澳台短信通道号1', app-key: 'app-key1', app-secret: 'app-secret1', template-id: '模板ID1', signature: '签名名称,条件必填1' },
+              { template-name: '华为SMS模板2', sender: '国内短信签名通道号或国际/港澳台短信通道号2', app-key: 'app-key2', app-secret: 'app-secret2', template-id: '模板ID2', signature: '签名名称,条件必填2' } ]
+          jingdong:
+            [ { template-name: "jingdong1" },
+              { template-name: "jingdong2" }, ]
+          mengwang:
+            [ { template-name: "mengwang1" },
+              { template-name: "mengwang2" } ]
+          qiniu:
+            [ { template-name: qiniu1 },{ template-name: qiniu2 } ]
+          tencent:
+            [ { template-name: tencent1 },{ template-name: tencent2 } ]
