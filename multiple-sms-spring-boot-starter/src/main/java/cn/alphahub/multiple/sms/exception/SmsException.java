@@ -7,17 +7,17 @@ package cn.alphahub.multiple.sms.exception;
  * @version 1.0
  * @date 2021-09-28 18:30
  */
-public class SmsParamException extends RuntimeException {
+public class SmsException extends RuntimeException {
 
-    public SmsParamException() {
+    public SmsException() {
         super();
     }
 
-    public SmsParamException(String message) {
+    public SmsException(String message) {
         super(message);
     }
 
-    public SmsParamException(String message, Throwable cause) {
+    public SmsException(String message, Throwable cause) {
         super(message, cause);
     }
 }

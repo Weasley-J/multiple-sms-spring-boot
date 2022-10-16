@@ -2,7 +2,7 @@ package cn.alphahub.multiple.sms.impl;
 
 import cn.alphahub.multiple.sms.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
-import cn.alphahub.multiple.sms.exception.SmsParamException;
+import cn.alphahub.multiple.sms.exception.SmsException;
 import cn.hutool.json.JSONUtil;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
@@ -53,7 +53,7 @@ public class DefaultTencentCloudSmsClientImpl implements SmsClient {
     public Object send(String content, String... phones) {
         log.info("content:{}, phones:{}", content, JSONUtil.toJsonStr(phones));
         if (paramsIsEmpty(content, phones)) {
-            throw new SmsParamException("sms content or phones is empty.");
+            throw new SmsException("sms content or phones is empty.");
         }
         SendSmsResponse resp = new SendSmsResponse();
         try {
