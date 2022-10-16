@@ -1,6 +1,6 @@
 server:
   port: 8080
+
 spring:
   profiles:
-    include: demo
-    active: sms
+    active: demo

@@ -8,6 +8,7 @@ import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
 import cn.alphahub.multiple.sms.enums.SmsI18n;
 import cn.alphahub.multiple.sms.exception.SmsException;
 import cn.alphahub.multiple.sms.framework.SmsClient;
+import cn.alphahub.multiple.sms.framework.impl.mengwang.AbstractMengwangSmsClient;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.ObjectUtils;
@@ -60,7 +61,7 @@ public class DefaultMengwangSmsClientImpl implements CommandLineRunner, SmsClien
 
     @Override
     public void run(String... args) throws Exception {
-        Map<String, SmsClient> beansOfType = applicationContext.getBeansOfType(SmsClient.class);
+        Map<String, AbstractMengwangSmsClient> beansOfType = applicationContext.getBeansOfType(AbstractMengwangSmsClient.class);
         if (ObjectUtils.isNotEmpty(beansOfType)) {
             beansOfType.forEach((k, v) -> {
                 if (k.toLowerCase().contains(SmsI18n.CHINESE.name().toLowerCase()))

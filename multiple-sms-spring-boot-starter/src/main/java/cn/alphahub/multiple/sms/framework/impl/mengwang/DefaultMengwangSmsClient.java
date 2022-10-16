@@ -64,7 +64,7 @@ public class DefaultMengwangSmsClient {
         mwRequest.setSmsI18n(null);
         /* parameter start*/
         mwRequest.setUserid(smsProperties.getUserid());
-        mwRequest.setPwd(AbstractMengwangSmsClient.getPwdMd5Hex(smsProperties.getUserid(), smsProperties.getPwd(), timestamp));
+        mwRequest.setPwd(CLIENT.getPwdMd5Hex(smsProperties.getUserid(), smsProperties.getPwd(), timestamp));
         mwRequest.setMobile(StringUtils.join(wrapper.getRequest(), ","));
         mwRequest.setContent(URLEncodeUtil.encode(wrapper.getSignContent() + wrapper.getRequest().getContents()));
         mwRequest.setTimestamp(timestamp);
@@ -74,7 +74,7 @@ public class DefaultMengwangSmsClient {
         mwRequest.setExdata(null);
         /* parameter end*/
 
-        String url = smsProperties.getServerUrl() + AbstractMengwangSmsClient.SEND_BATCH_URI;
+        String url = smsProperties.getServerUrl() + CLIENT.SEND_BATCH_URI;
         String body = JSONUtil.toJsonStr(mwRequest);
         log.info("请求URL：{} 发送http原始json数据：{}", url, body);
 

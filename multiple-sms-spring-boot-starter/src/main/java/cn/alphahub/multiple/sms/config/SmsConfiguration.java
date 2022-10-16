@@ -1,8 +1,8 @@
 package cn.alphahub.multiple.sms.config;
 
-import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
+import cn.alphahub.multiple.sms.config.entity.AbstractSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.AliSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.HuaweiSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.JingdongSmsProperties;
@@ -10,39 +10,45 @@ import cn.alphahub.multiple.sms.config.entity.MengwangSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.QiniuSmsProperties;
 import cn.alphahub.multiple.sms.config.entity.TencentSmsProperties;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
+import cn.alphahub.multiple.sms.enums.SmsI18n;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
+import cn.alphahub.multiple.sms.exception.SmsException;
+import cn.alphahub.multiple.sms.framework.SmsClient;
+import cn.alphahub.multiple.sms.framework.TemplateNameDecorator;
+import cn.alphahub.multiple.sms.framework.TemplateNameWrapper;
+import cn.alphahub.multiple.sms.framework.impl.DefaultAliCloudSmsClientImpl;
+import cn.alphahub.multiple.sms.framework.impl.DefaultHuaweiCloudSmsClientImpl;
+import cn.alphahub.multiple.sms.framework.impl.DefaultJingdongCloudSmsClientImpl;
+import cn.alphahub.multiple.sms.framework.impl.DefaultQiniuCloudSmsClientImpl;
+import cn.alphahub.multiple.sms.framework.impl.DefaultTencentCloudSmsClientImpl;
+import cn.alphahub.multiple.sms.framework.impl.mengwang.MengwangChineseSmsClientAdapter;
+import cn.alphahub.multiple.sms.framework.impl.mengwang.MengwangEnglishSmsClientAdapter;
 import cn.hutool.core.collection.CollUtil;
-import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.context.properties.NestedConfigurationProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.DependsOn;
+import org.springframework.util.CollectionUtils;
 import org.springframework.validation.annotation.Validated;
 
+import javax.annotation.Nullable;
 import javax.validation.Valid;
 import javax.validation.constraints.NotEmpty;
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
-import java.util.concurrent.TimeUnit;
-
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.MultipleSmsTemplateProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsTemplateProperties;
-import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsThreadPoolProperties;
 
 /**
  * 多模板短信配置
@@ -57,12 +63,17 @@ import static cn.alphahub.multiple.sms.config.SmsConfiguration.SmsThreadPoolProp
 @ConditionalOnBean(annotation = {EnableMultipleSms.class})
 @ConfigurationPropertiesScan({"cn.alphahub.multiple.sms.config"})
 @EnableConfigurationProperties({
-        SmsProperties.class, SmsTemplateProperties.class, MultipleSmsTemplateProperties.class,
         SmsThreadPoolProperties.class, AliSmsProperties.class, AliSmsProperties.class,
         HuaweiSmsProperties.class, JingdongSmsProperties.class, MengwangSmsProperties.class,
-        QiniuSmsProperties.class, TencentSmsProperties.class, MetadataProperties.class,
+        QiniuSmsProperties.class, TencentSmsProperties.class, SmsMetadataProperties.class,
 })
 public class SmsConfiguration {
+
+    private final ApplicationContext applicationContext;
+
+    public SmsConfiguration(ApplicationContext applicationContext) {
+        this.applicationContext = applicationContext;
+    }
 
     /**
      * 装饰的短信模板名称
@@ -71,44 +82,102 @@ public class SmsConfiguration {
      * @param templateName 配置文件里指定的短信模板名称
      * @return 短信模板名称
      */
-    public static String decorateTemplateName(@NotNull SmsSupplier smsSupplier, @NotEmpty String templateName) {
-        return smsSupplier.getCode() + ":" + templateName;
+    public static String decorateTemplateName(@NotNull SmsSupplier smsSupplier, @NotEmpty String templateName, @Nullable SmsI18n smsI18n) {
+        String name = smsSupplier.getCode() + ":" + templateName;
+        if (smsI18n != null) {
+            name = name + ":" + smsI18n.name();
+        }
+        return name;
+    }
+
+    /**
+     * Process sms templates map
+     */
+    protected static void processSmsTemplatesMap(Map<String, AbstractSmsProperties> smsPropertiesMap,
+                                                 Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap) {
+        smsTemplatesMap.forEach((smsSupplier, abstractSmsProperties) -> abstractSmsProperties.forEach(smsProperty -> {
+            TemplateNameWrapper wrapper = new TemplateNameWrapper();
+            wrapper.setTemplateName(smsProperty.getTemplateName());
+            wrapper.setSmsSupplier(smsSupplier);
+            String decorateTemplateName = TemplateNameDecorator.decorateTemplateName(wrapper);
+            smsPropertiesMap.put(decorateTemplateName, smsProperty);
+            if (log.isInfoEnabled())
+                log.info("Loaded multiple sms template: {}", decorateTemplateName);
+        }));
+    }
+
+    /**
+     * 短信配置元数据映射
+     *
+     * @param metadataProperties 短信元数据配置属性
+     * @return smsTemplatesMap
+     */
+    @Bean(name = {"smsTemplatesMap"})
+    public Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap(@Valid SmsMetadataProperties metadataProperties) {
+        MultipleSmsTemplatesProperties templates = metadataProperties.getMultipleTemplates();
+        Map<SmsSupplier, List<? extends AbstractSmsProperties>> templatesMapping = new ConcurrentHashMap<>();
+        if (null != templates) {
+            if (!CollectionUtils.isEmpty(templates.getAli())) {
+                templatesMapping.put(SmsSupplier.ALI, templates.getAli());
+            }
+            if (!CollectionUtils.isEmpty(templates.getHuawei())) {
+                templatesMapping.put(SmsSupplier.HUAWEI, templates.getHuawei());
+            }
+            if (!CollectionUtils.isEmpty(templates.getJingdong())) {
+                templatesMapping.put(SmsSupplier.JINGDONG, templates.getJingdong());
+            }
+            if (!CollectionUtils.isEmpty(templates.getMengwang())) {
+                templatesMapping.put(SmsSupplier.MENGWANG, templates.getMengwang());
+            }
+            if (!CollectionUtils.isEmpty(templates.getQiniu())) {
+                templatesMapping.put(SmsSupplier.QINIU, templates.getQiniu());
+            }
+            if (!CollectionUtils.isEmpty(templates.getTencent())) {
+                templatesMapping.put(SmsSupplier.TENCENT, templates.getTencent());
+            }
+        }
+        return templatesMapping;
     }
 
     /**
      * 短信模板配置map集合
      *
-     * @param templateProperties         短信配置元数据
-     * @param multiSmsTemplateProperties 多短信模板、多供应商配置元数据
+     * @param defaultTemplate 默认短信配置元数据
+     * @param smsTemplatesMap 短信配置元数据映射
      * @return 短信模板配置集合
-     * @apiNote 初始化短信模板配置集合为50个（包含默认短信模板）
      */
     @Bean({"smsPropertiesMap"})
-    public Map<String, SmsTemplateProperties> smsPropertiesMap(@Valid SmsTemplateProperties templateProperties,
-                                                               @Valid MultipleSmsTemplateProperties multiSmsTemplateProperties
+    public Map<String, AbstractSmsProperties> smsPropertiesMap(@Valid DefaultSmsTemplateProperties defaultTemplate,
+                                                               @Qualifier("smsTemplatesMap") Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap
+
     ) {
-        Map<String, SmsTemplateProperties> smsSupportMap = new ConcurrentHashMap<>();
-        if (Objects.nonNull(templateProperties)) {
-            templateProperties.setTemplateName(SMS.DEFAULT_TEMPLATE);
-            String decorateTemplateName = decorateTemplateName(templateProperties.getSmsSupplier(), templateProperties.getTemplateName());
-            smsSupportMap.put(decorateTemplateName, templateProperties);
-            if (log.isInfoEnabled()) {
-                log.info("Loaded default sms template '{}'", decorateTemplateName);
-            }
-        }
-        if (CollUtil.isNotEmpty(multiSmsTemplateProperties.getTemplateProperties())) {
-            for (SmsTemplateProperties templateProperty : multiSmsTemplateProperties.getTemplateProperties()) {
-                String decorateTemplateName = decorateTemplateName(templateProperty.getSmsSupplier(), templateProperty.getTemplateName());
-                smsSupportMap.putIfAbsent(decorateTemplateName, templateProperty);
-                if (log.isInfoEnabled()) {
-                    log.info("Loaded multiple sms template '{}'", decorateTemplateName);
+        Map<String, AbstractSmsProperties> smsPropertiesMap = new ConcurrentHashMap<>();
+        if (null != defaultTemplate) {
+            String defaultTemplateName = defaultTemplate.getTemplateName();
+            if (StringUtils.isBlank(defaultTemplateName)) defaultTemplate.setTemplateName(SMS.DEFAULT_TEMPLATE);
+            TemplateNameWrapper wrapper = new TemplateNameWrapper();
+            wrapper.setTemplateName(defaultTemplate.getTemplateName());
+            wrapper.setSmsSupplier(defaultTemplate.getSmsSupplier());
+            String decorateTemplateName = TemplateNameDecorator.decorateTemplateName(wrapper);
+            List<? extends AbstractSmsProperties> smsProperties = smsTemplatesMap.get(defaultTemplate.getSmsSupplier());
+            for (AbstractSmsProperties smsProperty : smsProperties) {
+                if (defaultTemplateName.equals(smsProperty.getTemplateName())) {
+                    smsPropertiesMap.put(decorateTemplateName, smsProperty);
+                    break;
                 }
             }
+            if (smsPropertiesMap.get(decorateTemplateName) == null)
+                throw new SmsException("默认短信模板配置不正确！");
+            if (log.isInfoEnabled())
+                log.info("Loaded default sms template: {}", decorateTemplateName);
+        }
+        if (CollUtil.isNotEmpty(smsTemplatesMap)) {
+            processSmsTemplatesMap(smsPropertiesMap, smsTemplatesMap);
         }
         if (log.isDebugEnabled()) {
-            log.debug("SMS templates has loaded: {}", smsSupportMap);
+            log.debug("SMS templates has loaded: {}", smsPropertiesMap);
         }
-        return smsSupportMap;
+        return smsPropertiesMap;
     }
 
     /**
@@ -119,24 +188,34 @@ public class SmsConfiguration {
      */
     @Bean({"smsClientMap"})
     @DependsOn({"smsPropertiesMap"})
-    public Map<String, SmsClient> smsClientMap(@Qualifier("smsPropertiesMap") Map<String, SmsTemplateProperties> smsPropertiesMap) {
+    public Map<String, SmsClient> smsClientMap(@Qualifier("smsPropertiesMap") Map<String, AbstractSmsProperties> smsPropertiesMap) {
         Map<String, SmsClient> smsClientMap = new ConcurrentHashMap<>();
-        smsPropertiesMap.forEach((name, template) -> {
-            switch (template.getSmsSupplier()) {
+        smsPropertiesMap.forEach((templateName, smsProperties) -> {
+            switch (smsProperties.getSmsSupplier()) {
                 case ALI:
-                    // smsClientMap.putIfAbsent(name, new DefaultAliCloudSmsClientImpl(template.getSmsProperties()));
+                    smsClientMap.put(templateName, new DefaultAliCloudSmsClientImpl((AliSmsProperties) smsProperties));
                     break;
                 case HUAWEI:
-                    // smsClientMap.putIfAbsent(name, new DefaultHuaweiCloudSmsClientImpl(template.getSmsProperties()));
+                    smsClientMap.put(templateName, new DefaultHuaweiCloudSmsClientImpl((HuaweiSmsProperties) smsProperties));
                     break;
                 case JINGDONG:
-                    //smsClientMap.putIfAbsent(name, new DefaultJingdongCloudSmsClientImpl(template.getSmsProperties()));
+                    smsClientMap.put(templateName, new DefaultJingdongCloudSmsClientImpl((JingdongSmsProperties) smsProperties));
+                    break;
+                case MENGWANG:
+                    assert smsProperties instanceof MengwangSmsProperties;
+                    MengwangSmsProperties mwSmsProperties = (MengwangSmsProperties) smsProperties;
+                    if (mwSmsProperties.getSmsI18nMapping().get(SmsI18n.CHINESE) != null) {
+                        smsClientMap.put(templateName + ":" + SmsI18n.CHINESE, new MengwangChineseSmsClientAdapter((MengwangSmsProperties) smsProperties));
+                    }
+                    if (mwSmsProperties.getSmsI18nMapping().get(SmsI18n.ENGLISH) != null) {
+                        smsClientMap.put(templateName + ":" + SmsI18n.ENGLISH, new MengwangEnglishSmsClientAdapter(mwSmsProperties));
+                    }
                     break;
                 case QINIU:
-                    //smsClientMap.putIfAbsent(name, new DefaultQiniuCloudSmsClientImpl(template.getSmsProperties()));
+                    smsClientMap.put(templateName, new DefaultQiniuCloudSmsClientImpl((QiniuSmsProperties) smsProperties));
                     break;
                 case TENCENT:
-                    //smsClientMap.putIfAbsent(name, new DefaultTencentCloudSmsClientImpl(template.getSmsProperties()));
+                    smsClientMap.put(templateName, new DefaultTencentCloudSmsClientImpl((TencentSmsProperties) smsProperties));
                     break;
                 default:
                     break;
@@ -154,10 +233,9 @@ public class SmsConfiguration {
      */
     @Bean
     @DependsOn({"smsPropertiesMap", "smsClientMap"})
-    public SmsWrapper smsWrapper(@Qualifier("smsPropertiesMap") Map<String, SmsTemplateProperties> smsPropertiesMap,
-                                 @Qualifier("smsClientMap") Map<String, SmsClient> smsClientMap
-    ) {
-        return new SmsWrapper(smsPropertiesMap, smsClientMap);
+    public SmsWrapper smsWrapper(@Qualifier("smsClientMap") Map<String, SmsClient> smsClientMap,
+                                 @Qualifier("smsPropertiesMap") Map<String, AbstractSmsProperties> smsPropertiesMap) {
+        return new SmsWrapper(smsClientMap, smsPropertiesMap);
     }
 
     /**
@@ -179,103 +257,4 @@ public class SmsConfiguration {
                 new ThreadPoolExecutor.AbortPolicy());
     }
 
-    /**
-     * 短信配置元数据
-     */
-    @Data
-    @ConfigurationProperties(prefix = "spring.sms.sms-properties")
-    public static class SmsProperties {
-        /**
-         * 短信access-key
-         */
-        @NotEmpty(message = "短信access-key不能为空")
-        private String accessKey;
-        /**
-         * 短信secret-key
-         */
-        @NotEmpty(message = "短信secret-key不能为空")
-        private String secretKey;
-        /**
-         * 区域
-         */
-        private String regionId;
-        /**
-         * 短信签名、短信签名id
-         */
-        private String signName;
-        /**
-         * 短信模板code、短信模板id
-         */
-        private String templateCode;
-        /**
-         * 短信sdk的appId，有就填，没有留空，如：腾讯云需要、阿里云不需要
-         */
-        private String appId;
-    }
-
-    /**
-     * 短信模板配置元数据
-     */
-    @Data
-    @ConfigurationProperties(prefix = "spring.sms")
-    public static class SmsTemplateProperties {
-        /**
-         * 短信模板名称（同一短信供应商的如果有多个短信模板,模板名称不能重复，重复情况仅配置文件最后一个模板名称有效）
-         */
-        @NotEmpty(message = "短信模板名称不能为空")
-        private String templateName;
-        /**
-         * 短信供应商
-         */
-        @NotNull(message = "短信供应商不能为空")
-        private SmsSupplier smsSupplier;
-        /**
-         * 短信配置元数据
-         */
-        @Valid
-        @NestedConfigurationProperty
-        private SmsProperties smsProperties;
-    }
-
-    /**
-     * 多短信模板、多供应商配置元数据
-     */
-    @Data
-    @ConfigurationProperties(prefix = "spring.sms.multi-sms-templates")
-    public static class MultipleSmsTemplateProperties {
-        /**
-         * 短信模板配置列表
-         */
-        private List<SmsTemplateProperties> templateProperties;
-    }
-
-    /**
-     * 线程池配置参数
-     */
-    @Data
-    @ConfigurationProperties(prefix = "spring.sms.thread")
-    public static class SmsThreadPoolProperties {
-        /**
-         * 核心线程池数量，默认：50
-         */
-        private Integer corePoolSize = 50;
-        /**
-         * 最大线程数，默认：200
-         */
-        private Integer maximumPoolSize = 200;
-        /**
-         * 存活时间，默认：10
-         */
-        private Long keepAliveTime = 10L;
-        /**
-         * 存活时间单位，默认：{@code TimeUnit.SECONDS}
-         *
-         * @see TimeUnit
-         */
-        private TimeUnit timeUnit = TimeUnit.SECONDS;
-        /**
-         * 最大任务数量，默认：2000
-         */
-        private Integer capacity = 2000;
-    }
 }

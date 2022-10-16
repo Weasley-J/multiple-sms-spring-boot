@@ -48,63 +48,63 @@ import java.util.concurrent.atomic.AtomicReference;
  *
  *     //使用默认短信模板发送短信,默认模板可以注解{@code @SMS},也可以不加
  *     {@code @PostMapping("/sendWithDefaultTemplate")}
- *     public Object sendWithDefaultTemplate({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithDefaultTemplate({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用阿里云短信模板1发送短信
  *     {@code @SMS(templateName = "促销短信模板")}
  *     {@code @PostMapping("/sendWithAliCloud1")}
- *     public Object sendWithAliCloud1({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithAliCloud1({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用阿里云短信模板2发送短信
  *     {@code @SMS(templateName = "秒杀短信模板")}
  *     {@code @PostMapping("/sendWithAliCloud2")}
- *     public Object sendWithAliCloud2({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithAliCloud2({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用华为云发送短信
  *     {@code @SMS(templateName = "验证码短信模板", supplier = SmsSupplier.HUAWEI)}
  *     {@code @PostMapping("/sendWithHuaweiCloud")}
- *     public Object sendWithHuaweiCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithHuaweiCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用京东云发送短信
  *     {@code @SMS(templateName = "京东云短信验证码模板", supplier = SmsSupplier.JINGDONG)}
  *     {@code @PostMapping("/sendWithJingdongCloud")}
- *     public Object sendWithJingdongCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithJingdongCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用七牛云发送短信
  *     {@code @SMS(templateName = "验证码短信模板", supplier = SmsSupplier.QINIU)}
  *     {@code PostMapping("/sendWithQiniuCloud")}
- *     public Object sendWithQiniuCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithQiniuCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //使用腾讯云发送短信
  *     {@code @SMS(templateName = "腾讯云内容短信模板", supplier = SmsSupplier.TENCENT)}
  *     {@code @PostMapping("/sendWithTencentCloud")}
- *     public Object sendWithTencentCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithTencentCloud({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //自定义短信实现发送短信
  *     {@code @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)}
  *     {@code @PostMapping("/sendCustomSmsClient")}
- *     public Object sendWithCustomSmsClient({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithCustomSmsClient({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         return smsTemplate.send(smsRequest);
  *     }
  *
  *     //自定义短信实现发送短信
  *     {@code @SMS(invokeClass = MyCustomSmsClientDemoImpl.class)}
  *     {@code @PostMapping("/sendWithCustomSmsClientNested")}
- *     public Object sendWithCustomSmsClientNested({@code @RequestBody} BaseSmsRequest smsRequest) {
+ *     public AbstractSmsResponse sendWithCustomSmsClientNested({@code @RequestBody} BaseSmsRequest smsRequest) {
  *         SmsDemoController1 currentProxy = (SmsDemoController1) AopContext.currentProxy();
  *         Object send = smsTemplate.send(smsRequest);
  *         Object send0 = currentProxy.sendWithHuaweiCloud(smsRequest);
@@ -126,9 +126,11 @@ public class SmsTemplate {
     /**
      * 默认线程池
      */
-    protected final ThreadPoolExecutor smsThreadPoolExecutor;
+    private final SmsAspect smsAspect;
+    private final ThreadPoolExecutor smsThreadPoolExecutor;
 
-    public SmsTemplate(ThreadPoolExecutor smsThreadPoolExecutor) {
+    public SmsTemplate(SmsAspect smsAspect, ThreadPoolExecutor smsThreadPoolExecutor) {
+        this.smsAspect = smsAspect;
         this.smsThreadPoolExecutor = smsThreadPoolExecutor;
     }
 
@@ -139,7 +141,7 @@ public class SmsTemplate {
      * @return 短信供应商的发送短信后的返回结果
      */
     public AbstractSmsResponse send(@Valid BaseSmsRequest request) {
-        SmsClient smsClient = SmsAspect.getSmsClient();
+        SmsClient smsClient = smsAspect.getSmsClient();
         AtomicReference<AbstractSmsResponse> sendResult = new AtomicReference<>();
         RequestAttributes mainThreadRequestAttributes = RequestContextHolder.getRequestAttributes();
         CompletableFuture<AbstractSmsResponse> sendResponseFuture = CompletableFuture.supplyAsync(() -> {

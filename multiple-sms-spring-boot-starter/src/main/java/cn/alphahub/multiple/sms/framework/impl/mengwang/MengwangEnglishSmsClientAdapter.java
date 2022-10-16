@@ -8,22 +8,28 @@ import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
 import cn.alphahub.multiple.sms.enums.SmsI18n;
 import cn.alphahub.multiple.sms.framework.impl.mengwang.entity.MwSmsWrapper;
 import cn.hutool.json.JSONUtil;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 
 /**
- * Enter the description of this class here
+ * mengwang english sms client adapter
  *
  * @author weasley
  * @version 1.0.0
  */
 @Slf4j
+@Getter
 @Component
 @ConditionalOnBean(annotation = {EnableMultipleSms.class})
 public class MengwangEnglishSmsClientAdapter extends AbstractMengwangSmsClient {
-    private final DefaultMengwangSmsClient clientAggregator;
-    private final MengwangSmsProperties mengwangSmsProperties;
+    private DefaultMengwangSmsClient clientAggregator;
+    private MengwangSmsProperties mengwangSmsProperties;
+
+    public MengwangEnglishSmsClientAdapter(MengwangSmsProperties mengwangSmsProperties) {
+        this.mengwangSmsProperties = mengwangSmsProperties;
+    }
 
     public MengwangEnglishSmsClientAdapter(DefaultMengwangSmsClient clientAggregator, MengwangSmsProperties mengwangSmsProperties) {
         this.clientAggregator = clientAggregator;

@@ -1,6 +1,7 @@
 package cn.alphahub.multiple.sms.config.entity;
 
 import cn.alphahub.multiple.sms.enums.SmsI18n;
+import cn.alphahub.multiple.sms.enums.SmsSupplier;
 import cn.alphahub.multiple.sms.exception.SmsException;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

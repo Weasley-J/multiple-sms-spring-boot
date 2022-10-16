@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 
 /**
- * I18n Type
+ * Sms I18n Type
  *
  * @author weasley
  * @version 1.0.0

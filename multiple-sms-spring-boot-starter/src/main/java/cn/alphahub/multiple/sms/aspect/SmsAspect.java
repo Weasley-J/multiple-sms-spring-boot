@@ -1,13 +1,13 @@
 package cn.alphahub.multiple.sms.aspect;
 
-import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.annotation.EnableMultipleSms;
 import cn.alphahub.multiple.sms.annotation.SMS;
-import cn.alphahub.multiple.sms.config.SmsConfiguration;
+import cn.alphahub.multiple.sms.config.DefaultSmsTemplateProperties;
+import cn.alphahub.multiple.sms.config.SmsMetadataProperties;
 import cn.alphahub.multiple.sms.domain.SmsWrapper;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
+import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.hutool.core.date.DateUtil;
-import cn.hutool.extra.spring.SpringUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.ProceedingJoinPoint;
@@ -39,7 +39,6 @@ import static cn.alphahub.multiple.sms.framework.SmsClient.DefaultSmsClientPlace
  * @author lwj
  * @version 1.0
  * @apiNote <a href="https://blog.csdn.net/genius_wolf/article/details/109358153">{@code @Aspect}注解在类上不生效的帮助链接</a>
- * @date 2021-09-24
  */
 @Slf4j
 @Aspect
@@ -51,6 +50,14 @@ public class SmsAspect {
      */
     private static final ThreadLocal<SmsClient> SMS_CLIENT_THREAD_LOCAL = new ThreadLocal<>();
 
+    private final SmsWrapper smsWrapper;
+    private final SmsMetadataProperties smsMetadataProperties;
+
+    public SmsAspect(SmsWrapper smsWrapper, SmsMetadataProperties smsMetadataProperties) {
+        this.smsWrapper = smsWrapper;
+        this.smsMetadataProperties = smsMetadataProperties;
+    }
+
     /////////////////////////////////////////////////////////////
     //                 注解@SMS作用在类上是AOP切入点
     /////////////////////////////////////////////////////////////
@@ -58,16 +65,16 @@ public class SmsAspect {
     /**
      * 获取短信客户端实例
      *
-     * @return instance of AbstractMengwangSmsClient
+     * @return instance of SmsClient
      * @see SmsClient
      */
-    public static SmsClient getSmsClient() {
+    public SmsClient getSmsClient() {
         SmsClient smsClient = SMS_CLIENT_THREAD_LOCAL.get();
         if (null == smsClient) {
-            SmsConfiguration.SmsTemplateProperties properties = SpringUtil.getBean(SmsConfiguration.SmsTemplateProperties.class);
-            SmsSupplier smsSupplier = properties.getSmsSupplier();
-            String templateName = properties.getTemplateName();
-            smsClient = SpringUtil.getBean(SmsWrapper.class).getSmsClient(smsSupplier, templateName);
+            DefaultSmsTemplateProperties defaultTemplate = smsMetadataProperties.getDefaultTemplate();
+            SmsSupplier smsSupplier = defaultTemplate.getSmsSupplier();
+            String templateName = defaultTemplate.getTemplateName();
+            smsClient = this.smsWrapper.getSmsClient(smsSupplier, templateName);
         }
         return smsClient;
     }
@@ -90,7 +97,7 @@ public class SmsAspect {
     @Before("pointcutOnProxyClass() && @within(sms)")
     public void beforeOnProxyClass(JoinPoint point, SMS sms) throws Exception {
         SmsClient smsClient = getSmsClient(sms);
-        if (Objects.nonNull(sms.invokeClass()) && sms.invokeClass() != DefaultSmsClientPlaceholder.class) {
+        if (null != sms.invokeClass() && sms.invokeClass() != DefaultSmsClientPlaceholder.class) {
             SmsClient instance = sms.invokeClass().getDeclaredConstructor().newInstance();
             SMS_CLIENT_THREAD_LOCAL.set(instance);
         } else SMS_CLIENT_THREAD_LOCAL.set(smsClient);
@@ -177,7 +184,7 @@ public class SmsAspect {
      */
     @After("pointcutOnProxyMethod() && @annotation(sms)")
     public void afterOnProxyMethod(SMS sms) {
-        log.info("after");
+        log.info("after: {}", sms);
         if (SMS_CLIENT_THREAD_LOCAL.get() != null) SMS_CLIENT_THREAD_LOCAL.remove();
     }
 
@@ -220,9 +227,9 @@ public class SmsAspect {
      * 获取短信客户端实例
      *
      * @param sms 多模板短信注解
-     * @return AbstractMengwangSmsClient
+     * @return SmsClient
      */
     public SmsClient getSmsClient(SMS sms) {
-        return SpringUtil.getBean(SmsWrapper.class).getSmsClient(sms.supplier(), sms.templateName());
+        return smsWrapper.getSmsClient(sms.supplier(), sms.templateName());
     }
 }

@@ -1,5 +1,7 @@
 package cn.alphahub.multiple.sms.config.entity;
 
+import cn.alphahub.multiple.sms.enums.SmsSupplier;
+import jdk.nashorn.internal.scripts.JD;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 import lombok.NoArgsConstructor;
