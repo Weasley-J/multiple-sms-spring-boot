@@ -8,7 +8,6 @@ import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
 import cn.alphahub.multiple.sms.enums.SmsI18n;
 import cn.alphahub.multiple.sms.framework.impl.mengwang.entity.MwSmsWrapper;
 import cn.hutool.json.JSONUtil;
-import lombok.Data;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
