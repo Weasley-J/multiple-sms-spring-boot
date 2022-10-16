@@ -2,6 +2,7 @@ package cn.alphahub.multiple.sms.domain;
 
 import cn.alphahub.multiple.sms.config.entity.AbstractSmsProperties;
 import cn.alphahub.multiple.sms.enums.SmsSupplier;
+import cn.alphahub.multiple.sms.exception.SmsException;
 import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.alphahub.multiple.sms.framework.TemplateNameDecorator;
 import cn.alphahub.multiple.sms.framework.TemplateNameWrapper;
@@ -45,6 +46,9 @@ public class SmsWrapper {
         wrapper.setTemplateName(templateName);
         wrapper.setSmsSupplier(smsSupplier);
         String decorateTemplateName = TemplateNameDecorator.decorateTemplateName(wrapper);
-        return smsClientMap.get(decorateTemplateName);
+        if (smsClientMap.containsKey(decorateTemplateName)) {
+            return smsClientMap.get(decorateTemplateName);
+        }
+        throw new SmsException("模板名称不匹配：" + decorateTemplateName);
     }
 }

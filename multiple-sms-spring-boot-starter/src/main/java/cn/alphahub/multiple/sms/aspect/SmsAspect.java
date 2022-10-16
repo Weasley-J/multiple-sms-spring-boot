@@ -74,7 +74,7 @@ public class SmsAspect {
             DefaultSmsTemplateProperties defaultTemplate = smsMetadataProperties.getDefaultTemplate();
             SmsSupplier smsSupplier = defaultTemplate.getSmsSupplier();
             String templateName = defaultTemplate.getTemplateName();
-            smsClient = this.smsWrapper.getSmsClient(smsSupplier, templateName);
+            smsClient = smsWrapper.getSmsClient(smsSupplier, templateName);
         }
         return smsClient;
     }
