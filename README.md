@@ -202,84 +202,52 @@ public class SmsServiceDemoController {
 ```yaml
 spring:
   sms:
-    #默认线程池配置，一下参数是默认值，可根据自己的业务调整大小
-    thread:
-      core-pool-size: 50
-      maximum-pool-size: 200
-      keep-alive-time: 10
-      time-unit: seconds
-      capacity: 2000
-    #默认短信模板配置，短信模板名称, 默认: DEFAULT, 无需修改
-    template-name: DEFAULT
-    #默认短信供应商，大小写不敏感，可选值: ali, huawei, jingdong, qiniu, tencent
-    sms-supplier: ALI
-    #短信配置
-    sms-properties:
-      #短信access-key
-      access-key: accessKey1
-      #短信secret-key
-      secret-key: secretKey1
-      #区域
-      region-id: regionId1
-      #短信签名
-      sign-name: signName1
-      #短信模板code、短信模板id
-      template-code: templateCode1
-      #短信sdk的appId，有就填，没有留空，如：腾讯云需要、阿里云不需要
-      app-id: null
-    #多供应商、多短信模块配置
-    multi-sms-templates:
-      template-properties:
-        - template-name: "促销短信模板"
-          sms-supplier: ALI
-          sms-properties:
-            access-key: accessKey1
-            secret-key: secretKey1
-            region-id: regionId1
-            sign-name: signName1
-            template-code: templateCode1
-        - template-name: "秒杀短信模板"
-          sms-supplier: ALI
-          sms-properties:
-            access-key: accessKey1
-            secret-key: secretKey1
-            region-id: regionId1
-            sign-name: signName1
-            template-code: templateCode1
-        - template-name: "验证码短信模板"
-          sms-supplier: HUAWEI
-          sms-properties:
-            access-key: accessKey2
-            secret-key: secretKey2
-            region-id: regionId2
-            sign-name: signName2
-            template-code: templateCode2
-            app-id: your-app-id
-        - template-name: "京东云短信验证码模板"
-          sms-supplier: JINGDONG
-          sms-properties:
-            access-key: your-ak
-            secret-key: your-sk
-            region-id: cn-north-1
-            sign-name: your-sign-name
-            template-code: your-template-id
-        - template-name: "验证码短信模板"
-          sms-supplier: QINIU
-          sms-properties:
-            access-key: accessKey4
-            secret-key: secretKey4
-            region-id: regionId4
-            sign-name: signName4
-            template-code: templateCode4
-        - template-name: "腾讯云内容短信模板"
-          sms-supplier: TENCENT
-          sms-properties:
-            access-key: accessKey4
-            secret-key: secretKey4
-            region-id: "ap-nanjing"
-            sign-name: "xxx的个人主页"
-            template-code: 1141766
-            app-id: "your-sms-sdk-app-id"
+    conf:
+      thread:
+        core-pool-size: 10
+        maximum-pool-size: 100
+        keep-alive-time: 10
+        time-unit: seconds
+        capacity: 1000
+      sms-properties:
+        default-template:
+          sms-supplier: mengwang
+          template-name: 梦网国际短信平台配置2
+        multiple-templates:
+          ali:
+            [ { template-name: '促销短信模板1', sms-supplier: ali, access-key: 'accessKey1', secret-key: 'secretKey1', region-id: 'regionId1', sign-name: 'signName1', template-code: 'describe' },
+              { template-name: '秒杀短信模板2', sms-supplier: ali, access-key: 'accessKey2', secret-key: 'secretKey2', region-id: 'regionId2', sign-name: 'signName2', template-code: 'username' },
+              { template-name: '阿里短信模板3', sms-supplier: ali, access-key: 'accessKey3', secret-key: 'secretKey3', region-id: 'regionId3', sign-name: 'signName3', template-code: 'verifCode' },
+            ]
+          huawei:
+            [ { template-name: '华为SMS模板1', sms-supplier: huawei, sender: '国内短信签名通道号或国际/港澳台短信通道号1', app-key: 'app-key1', app-secret: 'app-secret1', template-id: '模板ID1', signature: '签名名称,条件必填1' },
+              { template-name: '华为SMS模板2', sms-supplier: huawei, sender: '国内短信签名通道号或国际/港澳台短信通道号2', app-key: 'app-key2', app-secret: 'app-secret2', template-id: '模板ID2', signature: '签名名称,条件必填2' },
+            ]
+          jingdong:
+            [ { template-name: '京东短信模板1', sms-supplier: jingdong, access-key-id: '短信accessKeyId1', secret-access-key: '短信secretAccessKey1', sign-id: '短信签名id1', template-id: '短信模板ID1' },
+              { template-name: '京东短信模板2', sms-supplier: jingdong, access-key-id: '短信accessKeyId2', secret-access-key: '短信secretAccessKey2', sign-id: '短信签名id2', template-id: '短信模板ID2' },
+              { template-name: '京东短信模板3', sms-supplier: jingdong, access-key-id: '短信accessKeyId3', secret-access-key: '短信secretAccessKey3', sign-id: '短信签名id3', template-id: '短信模板ID3' },
+              { template-name: '京东短信模板4', sms-supplier: jingdong, access-key-id: '短信accessKeyId4', secret-access-key: '短信secretAccessKey4', sign-id: '短信签名id4', template-id: '短信模板ID4' },
+            ]
+          mengwang:
+            [ { template-name: '梦网国际短信平台配置1', sms-supplier: mengwang,
+                sign-contents: { chinese: '【XX健康】', english: '【Xx Health】' },
+                sms-i18n-mapping: { chinese: { userid: 'chinese_userid1', pwd: 'chinese_pwd1', server-url: 'http://chinese_ip:port' },
+                                    english: { userid: 'english_userid1', pwd: 'english_pwd1', server-url: 'http://english_ip:port' } } },
+              { template-name: '梦网国际短信平台配置2', sms-supplier: mengwang,
+                sign-contents: { chinese: '【XX科技】', english: '【Xx Technology】' },
+                sms-i18n-mapping: { chinese: { userid: 'chinese_userid2', pwd: 'chinese_pwd2', server-url: 'http://chinese_ip:port' },
+                                    english: { userid: 'english_userid2', pwd: 'english_pwd2', server-url: 'http://english_ip:port' } } },
+            ]
+          qiniu:
+            [ { template-name: '七牛短信模板1', sms-supplier: qiniu, access-key: 'ak1', secret-key: 'sk1', template-id: 't1', parameters: 'verifyCode' },
+              { template-name: '七牛短信模板2', sms-supplier: qiniu, access-key: 'ak2', secret-key: 'sk2', template-id: 't2', parameters: 'username' },
+            ]
+          tencent:
+            [ { template-name: '腾讯短信模板1', sms-supplier: tencent, secret-id: '短信secretId1', secret-key: '短信secretKey1', sms-sdk-app-id: '短信SdkAppId1', template-id: '已审核通过的模板ID1', region: 'ap-nanjing', sign-name: '短信签名1' },
+              { template-name: '腾讯短信模板2', sms-supplier: tencent, secret-id: '短信secretId2', secret-key: '短信secretKey2', sms-sdk-app-id: '短信SdkAppId2', template-id: '已审核通过的模板ID2', region: 'ap-nanjing', sign-name: '短信签名2' },
+            ]
+
 ```
 
 ### 3.2 注解说明

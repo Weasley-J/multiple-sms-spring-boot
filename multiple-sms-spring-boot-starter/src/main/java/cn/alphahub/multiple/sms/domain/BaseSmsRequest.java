@@ -21,6 +21,7 @@ import lombok.ToString;
 public class BaseSmsRequest extends AbstractSmsRequest {
     /**
      * 国际化类型: 国内、国外
+     * <p>此参数可以用控制短信模板的语言类型
      *
      * @see SmsI18n
      */

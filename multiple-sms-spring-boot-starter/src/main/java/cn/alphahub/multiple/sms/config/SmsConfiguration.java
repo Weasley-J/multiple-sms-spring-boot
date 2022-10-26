@@ -24,6 +24,7 @@ import cn.alphahub.multiple.sms.framework.impl.DefaultTencentCloudSmsClientImpl;
 import cn.alphahub.multiple.sms.framework.impl.mengwang.MengwangChineseSmsClientAdapter;
 import cn.alphahub.multiple.sms.framework.impl.mengwang.MengwangEnglishSmsClientAdapter;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -123,9 +124,7 @@ public class SmsConfiguration {
      */
     @Bean({"smsPropertiesMap"})
     public Map<String, AbstractSmsProperties> smsPropertiesMap(@Valid DefaultSmsTemplateProperties defaultTemplate,
-                                                               @Qualifier("smsTemplatesMap") Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap
-
-    ) {
+                                                               @Qualifier("smsTemplatesMap") Map<SmsSupplier, List<? extends AbstractSmsProperties>> smsTemplatesMap) {
         Map<String, AbstractSmsProperties> smsPropertiesMap = new ConcurrentHashMap<>();
         if (null != defaultTemplate) {
             String defaultTemplateName = defaultTemplate.getTemplateName();
@@ -142,7 +141,7 @@ public class SmsConfiguration {
                 }
             }
             if (smsPropertiesMap.get(decorateTemplateName) == null)
-                throw new SmsException("默认短信模板配置不正确：" + decorateTemplateName);
+                throw new SmsException("默认短信模板配置不正确：" + decorateTemplateName + "; 可用模板列表:" + JSONUtil.toJsonStr(smsTemplatesMap.get(defaultTemplate.getSmsSupplier())));
             if (log.isInfoEnabled())
                 log.info("Loaded default sms template: {}", decorateTemplateName);
         }

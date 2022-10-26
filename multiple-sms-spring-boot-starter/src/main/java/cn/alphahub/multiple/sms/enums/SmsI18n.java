@@ -5,6 +5,7 @@ import lombok.Getter;
 
 /**
  * Sms I18n Type
+ * <p>可以用来控制语言类型选择合适的模板
  *
  * @author weasley
  * @version 1.0.0
