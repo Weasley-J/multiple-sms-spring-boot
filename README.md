@@ -198,7 +198,7 @@ public class SmsServiceDemoController {
 > 提示：同一短信供应商下面的多个模板的模板名称（`template-name`）不能重复。
 
 以下是**阿里云**、**腾讯云**、**华为云**、**京东云**、**七牛云**、**梦网国际**
-等短信模板的配置示例，包含模板情景：同一短信供应商多个短信模板、多个短信供应商多个模板, [默认配置示例](https://github.com/Weasley-J/multiple-sms-spring-boot/blob/multiple-sms-spring-boot-starter-test/src/main/resources/application-demo.yml)
+等短信模板的配置示例，包含模板情景：同一短信供应商多个短信模板、多个短信供应商多个模板, [默认配置示例](https://github.com/Weasley-J/multiple-sms-spring-boot/blob/master/multiple-sms-spring-boot-starter-test/src/main/resources/application-demo.yml)
 
 ```yaml
 spring:
