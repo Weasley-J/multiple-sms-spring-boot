@@ -189,7 +189,7 @@ public class SmsServiceDemoController {
 - 第`8`个方法支持自定义短信实现，通过注解`@SMS(invokeClass = MyCustomSmsClientDemoImpl.class)`指定自定义短信实现类
 - 通过注解`@SMS`在**同一短信提供商的多个短信模板**、**不同短信提供上商多个短信模板**之间自由切换短信模板
 - 发送短信的方法只有一个`send()`方法
-- 支持的短信提供商有`5`家：阿里云、腾讯云、华为云、京东云、七牛云
+- 支持的短信提供商有`6`家：阿里云、腾讯云、华为云、京东云、七牛云、梦网国际
 
 ## 3 细节分享
 
@@ -197,7 +197,8 @@ public class SmsServiceDemoController {
 
 > 提示：同一短信供应商下面的多个模板的模板名称（`template-name`）不能重复。
 
-以下是**阿里云**、**腾讯云**、**华为云**、**京东云**、**七牛云**等短信模板的配置示例，包含模板情景：同一短信供应商多个短信模板、多个短信供应商多个模板
+以下是**阿里云**、**腾讯云**、**华为云**、**京东云**、**七牛云**、**梦网国际**
+等短信模板的配置示例，包含模板情景：同一短信供应商多个短信模板、多个短信供应商多个模板, [默认配置示例](https://github.com/Weasley-J/multiple-sms-spring-boot/blob/multiple-sms-spring-boot-starter-test/src/main/resources/application-demo.yml)
 
 ```yaml
 spring:
