@@ -7,6 +7,7 @@ import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
 import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -129,7 +130,7 @@ public class SmsTemplate {
     private final SmsAspect smsAspect;
     private final ThreadPoolExecutor smsThreadPoolExecutor;
 
-    public SmsTemplate(SmsAspect smsAspect, ThreadPoolExecutor smsThreadPoolExecutor) {
+    public SmsTemplate(SmsAspect smsAspect, @Qualifier("multipleSmsThreadPoolExecutor") ThreadPoolExecutor smsThreadPoolExecutor) {
         this.smsAspect = smsAspect;
         this.smsThreadPoolExecutor = smsThreadPoolExecutor;
     }
