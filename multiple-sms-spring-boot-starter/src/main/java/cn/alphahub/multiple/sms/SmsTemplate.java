@@ -7,7 +7,6 @@ import cn.alphahub.multiple.sms.domain.BaseSmsRequest;
 import cn.alphahub.multiple.sms.framework.SmsClient;
 import cn.hutool.json.JSONUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.stereotype.Component;
 import org.springframework.validation.annotation.Validated;
@@ -128,11 +127,11 @@ public class SmsTemplate {
      * 默认线程池
      */
     private final SmsAspect smsAspect;
-    private final ThreadPoolExecutor smsThreadPoolExecutor;
+    private final ThreadPoolExecutor multipleSmsThreadPoolExecutor;
 
-    public SmsTemplate(SmsAspect smsAspect, @Qualifier("multipleSmsThreadPoolExecutor") ThreadPoolExecutor smsThreadPoolExecutor) {
+    public SmsTemplate(SmsAspect smsAspect, ThreadPoolExecutor multipleSmsThreadPoolExecutor) {
         this.smsAspect = smsAspect;
-        this.smsThreadPoolExecutor = smsThreadPoolExecutor;
+        this.multipleSmsThreadPoolExecutor = multipleSmsThreadPoolExecutor;
     }
 
     /**
@@ -148,7 +147,7 @@ public class SmsTemplate {
         CompletableFuture<AbstractSmsResponse> sendResponseFuture = CompletableFuture.supplyAsync(() -> {
             RequestContextHolder.setRequestAttributes(mainThreadRequestAttributes);
             return smsClient.send(request);
-        }, smsThreadPoolExecutor).whenComplete((result, throwable) -> {
+        }, multipleSmsThreadPoolExecutor).whenComplete((result, throwable) -> {
             if (Objects.nonNull(result)) {
                 sendResult.set(result);
             }

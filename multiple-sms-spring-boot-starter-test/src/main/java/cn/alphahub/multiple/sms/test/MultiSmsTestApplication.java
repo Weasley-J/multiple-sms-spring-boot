@@ -22,4 +22,33 @@ public class MultiSmsTestApplication {
         SpringApplication.run(MultiSmsTestApplication.class, args);
     }
 
+    /*@Bean
+    public Executor threadPoolExecutor0() {
+        return new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+    }
+
+    @Bean
+    public ThreadPoolExecutor threadPoolExecutor1() {
+        return new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+    }
+
+    @Bean
+    public ThreadPoolExecutor multipleSmsThreadPoolExecutor1() {
+        return new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+    }
+
+    @Bean
+    public ThreadPoolExecutor threadPoolExecutor3() {
+        return new ThreadPoolExecutor(2, 4, 10, TimeUnit.SECONDS,
+                new LinkedBlockingQueue<>(), Executors.defaultThreadFactory(), new ThreadPoolExecutor.AbortPolicy());
+    }
+
+    @Bean
+    @Primary
+    public SmsTemplate smsTemplate(SmsAspect smsAspect, ThreadPoolExecutor threadPoolExecutor3) {
+        return new SmsTemplate(smsAspect, threadPoolExecutor3);
+    }*/
 }

@@ -42,7 +42,6 @@ import javax.validation.Valid;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
@@ -219,7 +218,7 @@ public class SmsConfiguration {
      * @return thread pool executor
      */
     @Bean(name = {"multipleSmsThreadPoolExecutor"})
-    @ConditionalOnMissingBean(value = {ThreadPoolExecutor.class, Executor.class})
+    @ConditionalOnMissingBean(value = {ThreadPoolExecutor.class})
     public ThreadPoolExecutor multipleSmsThreadPoolExecutor(SmsThreadPoolProperties smsThreadPoolProperties) {
         return new ThreadPoolExecutor(
                 smsThreadPoolProperties.getCorePoolSize(),
